@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="TwentyOne.BLL/TwentyOne.BLL.csproj" />
+  <Project Path="TwentyOne.DAL/TwentyOne.DAL.csproj" />
+  <Project Path="TwentyOne.Shared/TwentyOne.Shared.csproj" />
+  <Project Path="TwentyOne.Web.API/TwentyOne.Web.API.csproj" />
+  <Project Path="TwentyOne.Web.MVC/TwentyOne.Web.MVC.csproj" />
+</Solution>
