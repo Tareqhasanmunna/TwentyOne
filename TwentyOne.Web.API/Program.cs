@@ -105,7 +105,7 @@ namespace TwentyOne.Web.API
                 app.MapScalarApiReference();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();

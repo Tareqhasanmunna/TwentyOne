@@ -1,0 +1,112 @@
+﻿@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#e94560,#c73652)">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div style="font-size:13px;opacity:0.85">Total Orders</div>
+                    <div style="font-size:32px;font-weight:700">@ViewBag.TotalOrders</div>
+                </div>
+                <i class="bi bi-receipt" style="font-size:36px;opacity:0.4"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#0d6efd,#0a58ca)">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div style="font-size:13px;opacity:0.85">Total Products</div>
+                    <div style="font-size:32px;font-weight:700">@ViewBag.TotalProducts</div>
+                </div>
+                <i class="bi bi-box-seam" style="font-size:36px;opacity:0.4"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#198754,#146c43)">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div style="font-size:13px;opacity:0.85">Total Brands</div>
+                    <div style="font-size:32px;font-weight:700">@ViewBag.TotalBrands</div>
+                </div>
+                <i class="bi bi-tag-fill" style="font-size:36px;opacity:0.4"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#ffc107,#e0a800)">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div style="font-size:13px;opacity:0.15">Pending Orders</div>
+                    <div style="font-size:32px;font-weight:700;color:#000">
+                        @ViewBag.PendingOrders
+                    </div>
+                </div>
+                <i class="bi bi-clock-history"
+                   style="font-size:36px;opacity:0.2;color:#000"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-receipt me-2"></i>Recent Orders</span>
+        <a href="/Admin/Orders" class="btn btn-sm btn-primary">View All</a>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th class="ps-4">Order #</th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (ViewBag.RecentOrders != null)
+                {
+                    foreach (var order in ViewBag.RecentOrders)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <strong>@order.OrderNumber</strong>
+                            </td>
+                            <td>@order.CustomerName</td>
+                            <td>৳@order.FinalAmount.ToString("N0")</td>
+                            <td>
+                                <span class="badge badge-@order.Status.ToLower()">
+                                    @order.Status
+                                </span>
+                            </td>
+                            <td style="font-size:13px;color:#6c757d">
+                                @order.CreatedAt.ToString("MMM dd, yyyy")
+                            </td>
+                            <td>
+                                <a href="/Admin/OrderDetail/@order.Id"
+                                   class="btn btn-sm btn-outline-secondary">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            No orders yet
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
