@@ -1,8 +1,379 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    Layout = "_PublicLayout";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@{
+    var banners = ViewBag.Banners as
+        List<TwentyOne.Shared.DTOs.Responses.BannerResponseDto>;
+    var apiUrl = ApiConfig.PublicBaseUrl;
+}
+
+
+<!-- Hero Section -->
+<div style="position:relative;height:500px;overflow:hidden;margin-top:0">
+
+    @if (banners != null && banners.Any())
+    {
+        <div id="heroCarousel" class="carousel slide h-100"
+             data-bs-ride="carousel" data-bs-interval="4000">
+            <div class="carousel-inner h-100">
+                @for (int i = 0; i < banners.Count; i++)
+                {
+                    <div class="carousel-item h-100 @(i == 0 ? "active" : "")">
+                        <img src="@(apiUrl + banners[i].ImageUrl)"
+                             style="width:100%;height:500px;object-fit:cover" />
+                    </div>
+                }
+            </div>
+
+            @if (banners.Count > 1)
+            {
+                <!-- Indicators -->
+                <div class="carousel-indicators" style="z-index:5">
+                    @for (int i = 0; i < banners.Count; i++)
+                    {
+                        <button type="button"
+                                data-bs-target="#heroCarousel"
+                                data-bs-slide-to="@i"
+                                class="@(i == 0 ? "active" : "")">
+                        </button>
+                    }
+                </div>
+             }
+        </div>
+    }
+    else
+    {
+        <!-- Default background when no banners -->
+        <div style="width:100%;height:100%;
+            background:linear-gradient(135deg,
+            #1a1a2e 0%,#16213e 60%,#0f3460 100%)">
+        </div>
+    }
+
+    <!-- Dark overlay -->
+    <div style="position:absolute;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.55);z-index:2"></div>
+
+    <!-- Fixed floating text overlay -->
+    <div style="position:absolute;top:0;left:0;right:0;bottom:0;
+        z-index:3;display:flex;align-items:center;
+        justify-content:center;pointer-events:none">
+        <div class="text-center text-white px-4" style="width:100%;
+            max-width:700px">
+            <h1 style="font-size:clamp(28px,5vw,52px);font-weight:800;
+                text-shadow:0 2px 10px rgba(0,0,0,0.5)">
+                Twenty One Diecast
+            </h1>
+            <p style="color:#ddddee;font-size:clamp(13px,2vw,16px);
+                margin:15px 0 25px;
+                text-shadow:0 1px 6px rgba(0,0,0,0.5)">
+                Bangladesh's premier diecast scale model store.
+            </p>
+
+            <!-- Search Bar in Hero -->
+            <div style="pointer-events:all;max-width:550px;
+                margin:0 auto 20px"
+                 id="heroSearchBar">
+                <div style="display:flex;align-items:center;
+                    background:rgba(255,255,255,0.15);
+                    backdrop-filter:blur(0.5px);
+                    border:1.5px solid rgba(255,255,255,0.3);
+                    border-radius:50px;padding:6px 8px 6px 18px;
+                    height:52px;
+                    transition:all 0.3s"
+                     id="heroSearchContainer">
+                    <i class="bi bi-search"
+                       style="color:white;font-size:16px;
+                    margin-right:10px;flex-shrink:0"></i>
+                    <input type="text" id="heroSearchInput"
+                           placeholder="Search products or brands..."
+                           autocomplete="off"
+                           style="background:transparent;border:none;
+                    outline:none;color:white;font-size:15px;
+                    width:100%"
+                           onfocus="document.getElementById(
+                    'heroSearchContainer')
+                    .style.background=
+                    'rgba(255,255,255,0.25)';
+                    document.getElementById(
+                    'heroSearchContainer')
+                    .style.borderColor=
+                    'rgba(233,69,96,0.8)';
+                    showHeroSuggestions()"
+                           onblur="setTimeout(()=>{
+                    hideHeroSuggestions();
+                    document.getElementById(
+                    'heroSearchContainer')
+                    .style.background=
+                    'rgba(255,255,255,0.15)';
+                    document.getElementById(
+                    'heroSearchContainer')
+                    .style.borderColor=
+                    'rgba(255,255,255,0.3)'},200)"
+                           oninput="fetchHeroSuggestions(this.value)"
+                           onkeydown="if(event.key==='Enter')
+                    window.location='/Home/Shop?search='+
+                    encodeURIComponent(this.value)" />
+                    <button onclick="window.location='/Home/Shop?search='+
+                        encodeURIComponent(document
+                        .getElementById('heroSearchInput')
+                        .value)"
+                            style="background:none;
+                        border:none;
+                        outline:none;
+                        box-shadow:none;
+                        padding:8px 20px;
+                        color:white;
+                        font-weight:600;
+                        font-size:14px;
+                        cursor:pointer;
+                        white-space:nowrap">
+                        Search
+                    </button>
+                </div>
+
+                <!-- Suggestions -->
+                <div id="heroSuggestions"
+                     style="display:none;background:white;
+                    border-radius:12px;
+                    box-shadow:0 8px 25px rgba(0,0,0,0.15);
+                    margin-top:8px;overflow:hidden;
+                    max-height:350px;overflow-y:auto;
+                    text-align:left">
+                </div>
+            </div>
+
+            
+        </div>
+    </div>
 </div>
+
+<!-- Pre-Order Section -->
+<section class="py-5" style="background:#f8f9fa">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h2 class="section-title mb-1">Pre-Order</h2>
+                <p class="section-subtitle mb-0">
+                    Reserve upcoming models before they arrive
+                </p>
+            </div>
+            <a href="/Home/Shop?isPreOrder=true"
+               class="btn btn-outline-primary btn-sm">
+                View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        @{
+            var preOrders = ViewBag.PreOrderProducts as
+                List<TwentyOne.Shared.DTOs.Responses.ProductResponseDto>;
+        }
+
+        @if (preOrders != null && preOrders.Any())
+        {
+            <div class="row g-4 align-items-stretch">
+                @foreach (var product in preOrders)
+                {
+                    <div class="col-6 col-md-3 h-100">
+                        @{
+                            await Html.RenderPartialAsync("_ProductCard",
+                                (TwentyOne.Shared.DTOs.Responses.ProductResponseDto)product);
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">No pre-order products available.</p>
+        }
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-5" style="background:white">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h2 class="section-title mb-1">New Arrivals</h2>
+                <p class="section-subtitle mb-0">
+                    Latest additions to our collection
+                </p>
+            </div>
+            <a href="/Home/Shop" class="btn btn-outline-primary btn-sm">
+                View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4 align-items-stretch">
+            @foreach (var product in ViewBag.FeaturedProducts)
+            {
+                <div class="col-6 col-md-3 h-100">
+                    @{
+                        await Html.RenderPartialAsync("_ProductCard", (TwentyOne.Shared.DTOs.Responses.ProductResponseDto)product);
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Limited Edition -->
+@if (((List<TwentyOne.Shared.DTOs.Responses.ProductResponseDto>)
+    ViewBag.LimitedProducts).Any())
+{
+    <section class="py-5"
+             style="background:white">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-end mb-4">
+                <div>
+                    <h2 class="section-title mb-1">
+                        Limited Edition
+                    </h2>
+                    <p class="section-subtitle mb-0">
+                        Exclusive collector models — get them before they're gone
+                    </p>
+                </div>
+                <a href="/Home/Shop?isLimitedEdition=true"
+                   class="btn btn-outline-primary btn-sm">
+                    View All <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="row g-4 align-items-stretch">
+                @foreach (var product in ViewBag.LimitedProducts)
+                {
+                    <div class="col-6 col-md-3 h-100">
+                        @{
+                            await Html.RenderPartialAsync("_ProductCard", (TwentyOne.Shared.DTOs.Responses.ProductResponseDto)product);
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+}
+
+@section Scripts {
+    <script>
+        var heroSearchTimeout;
+        var apiUrl = 'http://localhost:5300';
+
+        function fetchHeroSuggestions(query) {
+            clearTimeout(heroSearchTimeout);
+            if (query.length < 2) {
+                hideHeroSuggestions();
+                return;
+            }
+            heroSearchTimeout = setTimeout(async function () {
+                try {
+                    const r = await fetch(apiUrl +
+                        '/api/search?q=' + encodeURIComponent(query));
+                    const d = await r.json();
+                    if (d.success)
+                        renderHeroSuggestions(
+                            d.data.products, d.data.brands, query);
+                } catch (e) { hideHeroSuggestions(); }
+            }, 300);
+        }
+
+        function renderHeroSuggestions(products, brands, query) {
+            const box = document.getElementById('heroSuggestions');
+            if (!products.length && !brands.length) {
+                box.innerHTML = `<div style="padding:16px;text-align:center;
+                            color:#6c757d;font-size:13px">
+                            No results for "${query}"</div>`;
+                box.style.display = 'block';
+                return;
+            }
+            let html = '';
+            if (brands.length) {
+                html += `<div style="padding:6px 14px 3px;font-size:10px;
+                            color:#aaa;font-weight:600;text-transform:uppercase;
+                            letter-spacing:0.5px">Brands</div>`;
+                brands.forEach(b => {
+                    html += `<a href="/Home/Shop?brandId=${b.id}"
+                                style="display:flex;align-items:center;gap:10px;
+                                padding:8px 14px;text-decoration:none;
+                                transition:background 0.15s"
+                                onmouseover="this.style.background='#f8f9fa'"
+                                onmouseout="this.style.background='white'">
+                                <i class="bi bi-tag-fill"
+                                   style="color:#e94560;font-size:12px"></i>
+                                <div style="font-size:13px;font-weight:600;
+                                            color:#1a1a2e">${b.name}</div>
+                                <span style="font-size:11px;color:#6c757d;
+                                             margin-left:auto">
+                                    ${b.productCount} products</span>
+                            </a>`;
+                });
+            }
+            if (products.length) {
+                html += `<div style="padding:6px 14px 3px;font-size:10px;
+                            color:#aaa;font-weight:600;text-transform:uppercase;
+                            letter-spacing:0.5px;border-top:1px solid #f0f0f0">
+                            Products</div>`;
+                products.forEach(p => {
+                    html += `<a href="/Home/Product/${p.slug}"
+                                style="display:flex;align-items:center;gap:10px;
+                                padding:8px 14px;text-decoration:none;
+                                transition:background 0.15s"
+                                onmouseover="this.style.background='#f8f9fa'"
+                                onmouseout="this.style.background='white'">
+                                ${p.imageUrl
+                            ? `<img src="${apiUrl + p.imageUrl}"
+                                       style="width:38px;height:38px;
+                                              object-fit:cover;border-radius:6px;
+                                              border:1px solid #eee">`
+                            : `<div style="width:38px;height:38px;
+                                        background:#f8f9fa;border-radius:6px;
+                                        display:flex;align-items:center;
+                                        justify-content:center">
+                                        <i class="bi bi-car-front"
+                                           style="color:#dee2e6"></i></div>`}
+                                <div style="flex:1">
+                                    <div style="font-size:13px;font-weight:600;
+                                                color:#1a1a2e">${p.name}</div>
+                                    <div style="font-size:11px;color:#6c757d">
+                                        ${p.brandName} • ${p.scale}</div>
+                                </div>
+                                <div style="font-size:13px;font-weight:700;
+                                            color:#e94560">
+                                    ৳${p.price.toLocaleString()}</div>
+                            </a>`;
+                });
+                html += `<a href="/Home/Shop?search=
+                            ${encodeURIComponent(query)}"
+                            style="display:block;padding:10px 14px;
+                            text-align:center;font-size:13px;color:#e94560;
+                            font-weight:600;border-top:1px solid #f0f0f0;
+                            background:#fafafa;text-decoration:none"
+                            onmouseover="this.style.background='#fff0f3'"
+                            onmouseout="this.style.background='#fafafa'">
+                            View all results for "${query}"
+                            <i class="bi bi-arrow-right ms-1"></i></a>`;
+            }
+            box.innerHTML = html;
+            box.style.display = 'block';
+        }
+
+        function showHeroSuggestions() {
+            var q = document.getElementById('heroSearchInput').value;
+            if (q.length >= 2) fetchHeroSuggestions(q);
+        }
+
+        function hideHeroSuggestions() {
+            document.getElementById('heroSuggestions')
+                .style.display = 'none';
+        }
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('#heroSearchBar'))
+                hideHeroSuggestions();
+        });
+    </script>
+}
+

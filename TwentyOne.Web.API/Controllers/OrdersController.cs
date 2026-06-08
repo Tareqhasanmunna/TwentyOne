@@ -12,10 +12,12 @@ namespace TwentyOne.Web.API.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly OrderPdfService _pdfService;
 
-        public OrdersController(IOrderService orderService)
+        public OrdersController(IOrderService orderService, OrderPdfService pdfService)
         {
             _orderService = orderService;
+            _pdfService = pdfService;
         }
 
         // GET api/orders (Admin only)
@@ -48,12 +50,17 @@ namespace TwentyOne.Web.API.Controllers
 
         // POST api/orders
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> PlaceOrder([FromBody] CreateOrderDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string? userId = null;
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
             var result = await _orderService.PlaceOrderAsync(userId!, dto);
 
             if (!result.Success)
@@ -82,6 +89,52 @@ namespace TwentyOne.Web.API.Controllers
             if (!result.Success)
                 return BadRequest(result);
             return Ok(result);
+        }
+
+        // GET api/orders/track/{orderNumber}
+        [HttpGet("track/{orderNumber}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TrackOrder(string orderNumber)
+        {
+            var result = await _orderService
+                .GetByOrderNumberAsync(orderNumber);
+
+            if (!result.Success)
+                return NotFound(result);
+
+            return Ok(result);
+        }
+
+        // GET api/orders/1/pdf
+        [HttpGet("{id}/pdf")]
+        
+        public async Task<IActionResult> DownloadPdf(int id)
+        {
+            var result = await _orderService.GetByIdAsync(id);
+            if (!result.Success)
+                return NotFound();
+
+            var pdf = _pdfService.GenerateOrderPdf(result.Data!);
+
+            return File(pdf, "application/pdf",
+                $"Order-{result.Data!.OrderNumber}.pdf");
+        }
+
+        [HttpGet("pdf/{orderNumber}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DownloadPdfByNumber(
+            string orderNumber)
+        {
+            var result = await _orderService
+                .GetByOrderNumberAsync(orderNumber);
+
+            if (!result.Success || result.Data == null)
+                return NotFound();
+
+            var pdf = _pdfService.GenerateOrderPdf(result.Data);
+
+            return File(pdf, "application/pdf",
+                $"Order-{orderNumber}.pdf");
         }
     }
 }

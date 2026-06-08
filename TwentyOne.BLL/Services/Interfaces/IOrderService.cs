@@ -10,9 +10,10 @@ namespace TwentyOne.BLL.Services.Interfaces
         Task<ApiResponse<List<OrderResponseDto>>> GetMyOrdersAsync(string userId);
         Task<ApiResponse<OrderResponseDto>> GetByIdAsync(int id);
         Task<ApiResponse<OrderResponseDto>> PlaceOrderAsync(
-            string userId, CreateOrderDto dto);
+            string? userId, CreateOrderDto dto);
         Task<ApiResponse<OrderResponseDto>> UpdateStatusAsync(
             int id, UpdateOrderStatusDto dto);
         Task<ApiResponse<string>> CancelOrderAsync(int id, string userId);
+        Task<ApiResponse<OrderResponseDto>> GetByOrderNumberAsync(string orderNumber);
     }
 }

@@ -1,0 +1,415 @@
+﻿@using TwentyOne.Web.MVC.Controllers
+@{
+    Layout = "_PublicLayout";
+    ViewData["Title"] = "Checkout";
+    var cartItems = ViewBag.CartItems as
+        List<TwentyOne.Web.MVC.Controllers.CartItemViewModel>;
+    decimal subtotal = (decimal)(ViewBag.Total ?? 0m);
+    var isLoggedIn = !string.IsNullOrEmpty(
+        Context.Session.GetString("JwtToken"));
+    var insideDhaka = (int)(ViewBag.InsideDhakaCharge ?? 80);
+    var outsideDhaka = (int)(ViewBag.OutsideDhakaCharge ?? 130);
+}
+
+<div class="container py-5">
+    <h4 class="fw-bold mb-4">
+        <i class="bi bi-credit-card me-2"></i>Checkout
+    </h4>
+
+    <div class="row g-4">
+        <!-- Left: Form -->
+        <div class="col-md-7">
+            <div class="card border-0 shadow-sm"
+                 style="border-radius:16px">
+                <div class="card-body p-4">
+
+                    <form action="/Shop/PlaceOrder" method="post"
+                          id="checkoutForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="deliveryCharge"
+                               id="deliveryChargeInput" value="0" />
+                        <input type="hidden" name="deliveryLocation"
+                               id="deliveryLocationInput" value="" />
+                        <input type="hidden" name="couponCode"
+                               id="appliedCoupon" value="" />
+                        <input type="hidden" name="discountAmount"
+                               id="discountAmountInput" value="0" />
+
+                        <!-- Guest info -->
+                        @if (!isLoggedIn)
+                        {
+                            <h6 class="fw-bold mb-3">
+                                Your Information (Guest Checkout)
+                            </h6>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    Full Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="guestName"
+                                       class="form-control" required
+                                       placeholder="Your full name" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    Phone Number <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="guestPhone"
+                                       class="form-control" required
+                                       placeholder="017XXXXXXXX" />
+                            </div>
+                            <hr class="my-4" />
+                        }
+                        else
+                        {
+                            <h6 class="fw-bold mb-3">
+                                Account Information
+                            </h6>
+
+                            <div class="mb-3 p-3" style="background:#f8f9fa; border-radius:10px">
+                                <div class="fw-semibold">@ViewBag.UserName</div>
+                                <div class="text-muted" style="font-size:13px">@ViewBag.UserEmail</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    Phone Number <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="guestPhone"
+                                       value="@ViewBag.UserPhone"
+                                       class="form-control" required
+                                       placeholder="017XXXXXXXX" />
+                                <small class="text-muted">
+                                    For delivery coordination and dispatch updates.
+                                </small>
+                            </div>
+                            <hr class="my-4" />
+                        }
+
+                        <!-- Delivery Address -->
+                        <h6 class="fw-bold mb-3">
+                            Delivery Details
+                        </h6>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                Full Delivery Address
+                                <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="deliveryAddress"
+                                      class="form-control"
+                                      rows="3" required
+                                      placeholder="House/Flat, Road, Area, District">
+                            </textarea>
+                        </div>
+
+                        <!-- ✅ Delivery Location Buttons -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                Delivery Zone
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="d-flex gap-3">
+                                <button type="button"
+                                        id="btnInside"
+                                        onclick="selectDelivery(
+                                    @insideDhaka,
+                                    'Inside Dhaka',
+                                    'btnInside',
+                                    'btnOutside')"
+                                        class="delivery-zone-btn
+                                    flex-grow-1">
+                                    <i class="bi bi-geo-alt me-2"></i>
+                                    Inside Dhaka
+                                    <div style="font-size:12px;
+                                        margin-top:4px;
+                                        opacity:0.8">
+                                        ৳@insideDhaka
+                                    </div>
+                                </button>
+                                <button type="button"
+                                        id="btnOutside"
+                                        onclick="selectDelivery(
+                                    @outsideDhaka,
+                                    'Outside Dhaka',
+                                    'btnOutside',
+                                    'btnInside')"
+                                        class="delivery-zone-btn
+                                    flex-grow-1">
+                                    <i class="bi bi-map me-2"></i>
+                                    Outside Dhaka
+                                    <div style="font-size:12px;
+                                        margin-top:4px;
+                                        opacity:0.8">
+                                        ৳@outsideDhaka
+                                    </div>
+                                </button>
+                            </div>
+                            <div id="deliveryError"
+                                 style="display:none;color:#dc3545;
+                                font-size:12px;margin-top:4px">
+                                Please select a delivery zone
+                            </div>
+                        </div>
+
+                        <!-- Coupon -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                Coupon Code
+                            </label>
+                            <div class="d-flex gap-2">
+                                <input type="text"
+                                       id="couponInput"
+                                       class="form-control"
+                                       placeholder="Enter coupon code" />
+                                <button type="button"
+                                        class="btn btn-outline-primary"
+                                        onclick="applyCoupon()">
+                                    Apply
+                                </button>
+                            </div>
+                            <div id="couponMsg"
+                                 style="font-size:12px;
+                            margin-top:4px"></div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                Order Notes
+                            </label>
+                            <textarea name="notes"
+                                      class="form-control"
+                                      rows="2"
+                                      placeholder="Any special instructions?">
+                            </textarea>
+                        </div>
+
+                        <!-- COD notice -->
+                        <div class="p-3 mb-4"
+                             style="background:#fff8f0;
+                            border-radius:10px;
+                            border:1px solid #ffe0b2">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-cash-coin"
+                                   style="font-size:24px;
+                                color:#e94560"></i>
+                                <div>
+                                    <div class="fw-bold">
+                                        Cash on Delivery (COD)
+                                    </div>
+                                    <div class="text-muted"
+                                         style="font-size:13px">
+                                        Pay when your order arrives
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button"
+                                onclick="submitOrder()"
+                                class="btn btn-primary w-100 btn-lg">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Place Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Order Summary -->
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm"
+                 style="border-radius:16px;
+                position:sticky;top:90px">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-4">Order Summary</h6>
+
+                    @foreach (var item in cartItems ??
+                        new List<CartItemViewModel>())
+                    {
+                        <div class="d-flex justify-content-between
+                            mb-2" style="font-size:13px">
+                            <span>
+                                @item.ProductName
+                                <span class="text-muted">
+                                    x@(item.Quantity)
+                                </span>
+                            </span>
+                            <span>
+                                ৳@item.Subtotal.ToString("N0")
+                            </span>
+                        </div>
+                    }
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between mb-2"
+                         style="font-size:13px">
+                        <span class="text-muted">Subtotal</span>
+                        <span>৳@subtotal.ToString("N0")</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2"
+                         style="font-size:13px">
+                        <span class="text-muted">Delivery</span>
+                        <span id="summaryDelivery">
+                            Select zone
+                        </span>
+                    </div>
+
+                    <div id="discountRow"
+                         style="display:none"
+                         class="d-flex justify-content-between mb-2
+                        text-success">
+                        <span>
+                            Discount
+                            <span id="couponLabel"
+                                  style="font-size:11px"></span>
+                        </span>
+                        <span id="discountAmountDisplay"></span>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between
+                        fw-bold">
+                        <span>Total</span>
+                        <span style="font-size:22px;color:#e94560"
+                              id="grandTotal">
+                            ৳@subtotal.ToString("N0")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var subtotal = @subtotal;
+        var deliveryCharge = 0;
+        var discountAmt = 0;
+        var apiUrl = 'http://localhost:5300';
+
+        function selectDelivery(charge, location, activeId, inactiveId) {
+            deliveryCharge = charge;
+
+            document.getElementById('deliveryChargeInput')
+                .value = charge;
+            document.getElementById('deliveryLocationInput')
+                .value = location;
+
+            // Update button styles
+            document.getElementById(activeId)
+                .classList.add('selected');
+            document.getElementById(inactiveId)
+                .classList.remove('selected');
+
+            // Hide error
+            document.getElementById('deliveryError')
+                .style.display = 'none';
+
+            // Update summary
+            document.getElementById('summaryDelivery')
+                .textContent = '৳' + charge.toLocaleString();
+
+            updateTotal();
+        }
+
+        function updateTotal() {
+            var total = subtotal + deliveryCharge - discountAmt;
+            document.getElementById('grandTotal')
+                .textContent = '৳' + total.toLocaleString();
+        }
+
+        async function applyCoupon() {
+            var code = document.getElementById('couponInput')
+                .value.trim();
+            if (!code) return;
+
+            var orderTotal = subtotal + deliveryCharge;
+
+            try {
+                const response = await fetch('/Shop/ValidateCoupon', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':
+                            'application/x-www-form-urlencoded',
+                        'RequestVerificationToken':
+                            document.querySelector(
+                                '[name="__RequestVerificationToken"]')
+                                .value
+                    },
+                    body: 'code=' + encodeURIComponent(code) +
+                        '&orderTotal=' + orderTotal
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    discountAmt = data.data.discountAmount;
+
+                    document.getElementById('couponLabel')
+                        .textContent =
+                        '(' + data.data.discountDescription + ')';
+                    document.getElementById('discountAmountDisplay')
+                        .textContent =
+                        '- ৳' + discountAmt.toLocaleString();
+                    document.getElementById('discountRow')
+                        .style.display = 'flex';
+                    document.getElementById('appliedCoupon')
+                        .value = code;
+                    document.getElementById('discountAmountInput')
+                        .value = discountAmt;
+                    document.getElementById('couponMsg').innerHTML =
+                        '<span class="text-success">✅ ' +
+                        data.data.discountDescription +
+                        ' applied!</span>';
+
+                    updateTotal();
+                } else {
+                    document.getElementById('couponMsg').innerHTML =
+                        '<span class="text-danger">❌ ' +
+                        data.message + '</span>';
+                    discountAmt = 0;
+                    document.getElementById('discountRow')
+                        .style.display = 'none';
+                    document.getElementById('appliedCoupon')
+                        .value = '';
+                    document.getElementById('discountAmountInput')
+                        .value = 0;
+                    updateTotal();
+                }
+            } catch (e) {
+                document.getElementById('couponMsg').innerHTML =
+                    '<span class="text-danger">❌ ' +
+                    'Something went wrong</span>';
+            }
+        }
+
+        function submitOrder() {
+            // Validate delivery zone selected
+            if (deliveryCharge === 0) {
+                document.getElementById('deliveryError')
+                    .style.display = 'block';
+                document.getElementById('deliveryError')
+                    .scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            document.getElementById('checkoutForm').submit();
+        }
+
+        // Enter on coupon input
+        document.getElementById('couponInput')
+            .addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    applyCoupon();
+                }
+            });
+    </script>
+}

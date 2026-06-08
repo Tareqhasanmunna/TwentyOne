@@ -1,0 +1,119 @@
+﻿@model List<TwentyOne.Shared.DTOs.Responses.BrandResponseDto>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Brands";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="mb-1 fw-bold">All Brands</h5>
+        <p class="text-muted mb-0" style="font-size:13px">
+            Manage diecast car brands
+        </p>
+    </div>
+    <a href="/Admin/CreateBrand" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Add Brand
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th class="ps-4">#</th>
+                    <th>Brand Name</th>
+                    <th>Description</th>
+                    <th>Products</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var brand in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 text-muted">@brand.Id</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (!string.IsNullOrEmpty(brand.LogoUrl))
+                                    {
+                                        <img src="@("http://localhost:5300" + brand.LogoUrl)"
+                                             alt="@brand.Name"
+                                             style="height:32px;width:32px;object-fit:contain;
+                                        border-radius:4px;border:1px solid #eee" />
+                                    }
+                                    else
+                                    {
+                                        <div style="height:32px;width:32px;background:#f0f0f0;
+                                            border-radius:4px;display:flex;align-items:center;
+                                            justify-content:center">
+                                            <i class="bi bi-tag" style="font-size:14px;color:#aaa"></i>
+                                        </div>
+                                    }
+                                    <strong>@brand.Name</strong>
+                                </div>
+                            </td>
+                            <td style="font-size:13px;color:#6c757d;max-width:250px">
+                                @(brand.Description?.Length > 60
+                                    ? brand.Description.Substring(0, 60) + "..."
+                                    : brand.Description ?? "-")
+                            </td>
+                            <td>
+                                <span class="badge bg-primary rounded-pill">
+                                    @brand.ProductCount
+                                </span>
+                            </td>
+                            <td>
+                                @if (brand.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </td>
+                            <td style="font-size:13px;color:#6c757d">
+                                @brand.CreatedAt.ToString("MMM dd, yyyy")
+                            </td>
+                            <td>
+                                <a href="/Admin/EditBrand/@brand.Id"
+                                   class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="DeleteBrand"
+                                      asp-controller="Admin"
+                                      method="post" style="display:inline"
+                                      onsubmit="return confirm('Delete this brand?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@brand.Id" />
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="bi bi-tag" style="font-size:40px;opacity:0.2"></i>
+                            <p class="mt-2 mb-0">No brands yet</p>
+                            <a href="/Admin/CreateBrand"
+                               class="btn btn-primary btn-sm mt-2">
+                                Add your first brand
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

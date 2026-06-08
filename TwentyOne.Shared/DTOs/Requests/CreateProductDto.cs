@@ -18,6 +18,9 @@ namespace TwentyOne.Shared.DTOs.Requests
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be a positive value.")]
         public decimal Price { get; set; }
 
+        public decimal? DiscountPercentage { get; set; }
+        public decimal? DiscountAmount { get; set; }
+
         [Required(ErrorMessage = "Stock Quantity is required.")]
         [Range(0, int.MaxValue, ErrorMessage = "Stock quantity must be a non-negative value.")]
         public int StockQuantity { get; set; }
@@ -34,5 +37,10 @@ namespace TwentyOne.Shared.DTOs.Requests
 
         public List<string>? ImageUrls { get; set; }
         public int? ReleaseYear { get; set; }
+
+        public DateTime? PreOrderDeadline { get; set; }
+        public decimal PreOrderDeposit { get; set; } = 200;
+
+
     }
 }

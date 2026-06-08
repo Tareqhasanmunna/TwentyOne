@@ -1,0 +1,129 @@
+﻿@model TwentyOne.Shared.DTOs.Responses.ProductResponseDto
+@{
+    var apiUrl = ApiConfig.PublicBaseUrl;
+}
+
+<div class="product-card d-flex flex-column h-100">
+    <a href="/Home/Product/@Model.Slug" class="text-decoration-none">
+        <div class="product-card-img">
+            @if (Model.ImageUrls.Any())
+            {
+                <img src="@(apiUrl + Model.ImageUrls.First())"
+                     alt="@Model.Name" />
+            }
+            else
+            {
+                <i class="bi bi-car-front no-img"></i>
+            }
+        </div>
+    </a>
+
+    <div class="product-card-body d-flex flex-column flex-grow-1">
+        <div class="d-flex justify-content-between align-items-start">
+            <div class="product-brand">@Model.BrandName</div>
+            <div class="product-scale">@Model.Scale</div>
+        </div>
+
+        <a href="/Home/Product/@Model.Slug" class="text-decoration-none">
+            <div class="product-name">@Model.Name</div>
+        </a>
+
+        <div class="d-flex justify-content-between
+            align-items-center mt-2">
+            <div>
+                @if (Model.HasDiscount)
+                {
+                    <div class="text-muted text-decoration-line-through"
+                         style="font-size:12px">
+                        ৳@Model.Price.ToString("N0")
+                    </div>
+                    <div class="product-price"
+                         style="color:#e94560">
+                        ৳@Model.DiscountedPrice.ToString("N0")
+                    </div>
+                }
+                else
+                {
+                    <div class="product-price">
+                        ৳@Model.Price.ToString("N0")
+                    </div>
+                }
+            </div>
+            <div>
+                @if (Model.HasDiscount)
+                {
+                    <span class="badge"
+                          style="background:#e94560;
+                        font-size:10px">
+                        @Model.DiscountLabel
+                    </span>
+                }
+                else if (Model.IsPreOrder)
+                {
+                    <span class="badge bg-info text-dark"
+                          style="font-size:10px">
+                        Pre-Order
+                    </span>
+                }
+                else if (!Model.InStock)
+                {
+                    <span class="badge bg-danger"
+                          style="font-size:10px">
+                        Out of Stock
+                    </span>
+                }
+                else if (Model.IsLimitedEdition)
+                {
+                    <span class="badge bg-warning text-dark"
+                          style="font-size:10px">
+                        Limited
+                    </span>
+                }
+            </div>
+        </div>
+
+        <!-- mt-auto pushes button to bottom always -->
+        <div class="mt-auto pt-2">
+            @if (Model.IsPreOrder && Model.IsPreOrderOpen)
+            {
+                <a href="/Home/PreOrder?productId=@Model.Id"
+                   class="btn btn-info btn-sm w-100 text-dark fw-semibold">
+                    <i class="bi bi-clock me-1"></i>
+                    Pre-Order — ৳@Model.PreOrderDeposit.ToString("N0") Deposit
+                </a>
+
+                @if (Model.PreOrderDaysRemaining > 0)
+                {
+                    <div class="text-center mt-1"
+                         style="font-size:10px;color:#6c757d">
+                        <i class="bi bi-clock me-1"></i>
+                        @Model.PreOrderDaysRemaining days left
+                    </div>
+                }
+            }
+            else if (Model.IsPreOrder && !Model.IsPreOrderOpen)
+            {
+                <button class="btn btn-secondary btn-sm w-100" disabled>
+                    Pre-Order Closed
+                </button>
+            }
+            else if (Model.InStock)
+            {
+                <form asp-action="AddToCart" asp-controller="Shop" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <input type="hidden" name="quantity" value="1" />
+                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-cart-plus me-1"></i> Add to Cart
+                    </button>
+                </form>
+            }
+            else
+            {
+                <button class="btn btn-secondary btn-sm w-100" disabled>
+                    Out of Stock
+                </button>
+            }
+        </div>
+    </div>
+</div>

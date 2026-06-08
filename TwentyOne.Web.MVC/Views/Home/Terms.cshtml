@@ -1,0 +1,492 @@
+﻿@{
+    Layout = "_PublicLayout";
+    ViewData["Title"] = "Terms & Conditions";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-9">
+
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h2 class="fw-bold" style="color:#1a1a2e">
+                    Terms & Conditions
+                </h2>
+                <p class="text-muted">Last updated: 2026-06-01</p>
+                <div style="width:60px;height:4px;background:#e94560;
+                border-radius:2px;margin:0 auto"></div>
+            </div>
+
+            <!-- Quick Nav -->
+            <div class="card border-0 mb-5"
+                 style="border-radius:16px;background:#f8f9fa">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">Quick Navigation</h6>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="#terms"
+                           class="btn btn-outline-primary btn-sm"
+                           style="border-radius:20px">
+                            Terms & Conditions
+                        </a>
+                        <a href="#returns"
+                           class="btn btn-outline-primary btn-sm"
+                           style="border-radius:20px">
+                            Return & Refund Policy
+                        </a>
+                        <a href="#cancellation"
+                           class="btn btn-outline-primary btn-sm"
+                           style="border-radius:20px">
+                            Cancellation Policy
+                        </a>
+                        <a href="#preorder"
+                           class="btn btn-outline-primary btn-sm"
+                           style="border-radius:20px">
+                            Pre-Order Policy
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terms & Conditions -->
+            <div id="terms" class="mb-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div style="width:40px;height:40px;
+                        background:#e3f2fd;border-radius:10px;
+                        display:flex;align-items:center;
+                        justify-content:center;flex-shrink:0">
+                        <i class="bi bi-file-text"
+                           style="color:#0d6efd;font-size:18px"></i>
+                    </div>
+                    <h4 class="fw-bold mb-0" style="color:#1a1a2e">
+                        Terms & Conditions
+                    </h4>
+                </div>
+
+                <div class="card border-0 shadow-sm"
+                     style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <p style="font-size:14px;color:#6c757d;
+                            line-height:1.8">
+                            Please read these Terms and Conditions
+                            carefully before using the website operated
+                            by TwentyOne. By accessing or using the
+                            Service, you agree to be bound by these
+                            Terms.
+                        </p>
+
+                        @{
+                            var terms = new[]
+                            {
+                                (
+                                    "1. Acceptance of Terms",
+                                    "bi-check-circle",
+                                    "#e3f2fd","#0d6efd",
+                                    "By accessing or using the Service, you agree to be bound by these Terms. If you disagree with any part of the terms, then you may not access the Service."
+                                ),
+                                (
+                                    "2. Accounts",
+                                    "bi-person-lock",
+                                    "#e3f2fd","#0d6efd",
+                                    "When you create an account with us, you must provide accurate and complete information. You are responsible for maintaining the confidentiality of your account and password. You agree to accept responsibility for all activities that occur under your account."
+                                ),
+                                (
+                                    "3. Product Information",
+                                    "bi-box-seam",
+                                    "#e3f2fd","#0d6efd",
+                                    "We make every effort to display as accurately as possible the colors, features, specifications, and details of the products available on our website. However, we do not guarantee that the colors, features, specifications, and details of the products will be accurate, complete, reliable, current, or free of other errors."
+                                ),
+                                (
+                                    "4. Pricing and Payment",
+                                    "bi-tag",
+                                    "#e3f2fd","#0d6efd",
+                                    "Prices for products are subject to change without notice. We reserve the right at any time to modify or discontinue the Service without notice. We shall not be liable to you or to any third-party for any modification, price change, suspension, or discontinuance of the Service."
+                                ),
+                                (
+                                    "5. Shipping and Delivery",
+                                    "bi-truck",
+                                    "#e3f2fd","#0d6efd",
+                                    "Our aim is to ship orders promptly; however, delivery times may vary. We are not liable for delays in shipping or delivery due to force majeure events or other reasons beyond our reasonable control."
+                                ),
+                                (
+                                    "6. Intellectual Property",
+                                    "bi-shield-lock",
+                                    "#e3f2fd","#0d6efd",
+                                    "The Service and its original content, features, and functionality are and will remain the exclusive property of TwentyOne and its licensors."
+                                ),
+                                (
+                                    "7. Links to Other Websites",
+                                    "bi-link-45deg",
+                                    "#e3f2fd","#0d6efd",
+                                    "Our Service may contain links to third-party websites or services that are not owned or controlled by TwentyOne. TwentyOne has no control over and assumes no responsibility for the content, privacy policies, or practices of any third-party websites or services."
+                                ),
+                                (
+                                    "8. Governing Law",
+                                    "bi-bank",
+                                    "#e3f2fd","#0d6efd",
+                                    "These Terms shall be governed and construed in accordance with the laws of Bangladesh, without regard to its conflict of law provisions."
+                                ),
+                                (
+                                    "9. Changes to Terms",
+                                    "bi-pencil-square",
+                                    "#e3f2fd","#0d6efd",
+                                    "We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will try to provide at least 30 days notice prior to any new terms taking effect."
+                                )
+                            };
+                        }
+
+                        @foreach (var (title, icon, bg, color, desc)
+                            in terms)
+                        {
+                            <div class="d-flex gap-3 mb-4">
+                                <div style="width:36px;height:36px;
+                                    background:@bg;
+                                    border-radius:8px;
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:center;
+                                    flex-shrink:0;
+                                    margin-top:2px">
+                                    <i class="bi @icon"
+                                       style="color:@color;
+                                    font-size:15px"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold mb-1"
+                                         style="font-size:15px;
+                                        color:#1a1a2e">
+                                        @title
+                                    </div>
+                                    <div style="font-size:14px;
+                                        color:#6c757d;
+                                        line-height:1.7">
+                                        @desc
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Return & Refund Policy -->
+            <div id="returns" class="mb-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div style="width:40px;height:40px;
+                        background:#e8f5e9;border-radius:10px;
+                        display:flex;align-items:center;
+                        justify-content:center;flex-shrink:0">
+                        <i class="bi bi-arrow-return-left"
+                           style="color:#198754;font-size:18px"></i>
+                    </div>
+                    <h4 class="fw-bold mb-0" style="color:#1a1a2e">
+                        Return & Refund Policy
+                    </h4>
+                </div>
+
+                <div class="card border-0 shadow-sm"
+                     style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <p style="font-size:14px;color:#6c757d;
+                            line-height:1.8">
+                            Thank you for shopping at TwentyOne.
+                            Your satisfaction is our priority and we
+                            want to ensure a transparent and
+                            hassle-free experience for you.
+                        </p>
+
+                        @{
+                            var returnTerms = new[]
+                            {
+                                (
+                                    "Damaged or Defective Products",
+                                    "bi-exclamation-triangle",
+                                    "#e8f5e9","#198754",
+                                    "If you receive a damaged or defective product, please contact our customer service team as soon as possible. We will provide instructions on returning the product, and upon verification, a full refund or replacement will be issued."
+                                ),
+                                (
+                                    "Incorrect Items",
+                                    "bi-arrow-left-right",
+                                    "#e8f5e9","#198754",
+                                    "If you receive an incorrect item, please notify us as soon as possible. We will arrange for the correct item to be shipped to you, and you may be required to return the incorrect item."
+                                ),
+                                (
+                                    "Return Process",
+                                    "bi-arrow-repeat",
+                                    "#e8f5e9","#198754",
+                                    "To initiate a return, please contact our customer service team at 01857997575. Our team will provide you with instructions on how to return the item. Please ensure that the item is securely packaged to prevent damage during transit."
+                                ),
+                                (
+                                    "Refund Processing",
+                                    "bi-wallet",
+                                    "#e8f5e9","#198754",
+                                    "Once we receive the returned item and verify its condition, we will process the refund or replacement accordingly. Refunds will be issued to the original payment method within 7 business days."
+                                ),
+                                (
+                                    "Non-Eligible Items",
+                                    "bi-x-circle",
+                                    "#e8f5e9","#198754",
+                                    "Certain items such as personalized or customized products may not be eligible for a refund unless they are damaged or defective. Pre-order deposits are strictly non-refundable."
+                                )
+                            };
+                        }
+
+                        @foreach (var (title, icon, bg, color, desc)
+                            in returnTerms)
+                        {
+                            <div class="d-flex gap-3 mb-4">
+                                <div style="width:36px;height:36px;
+                                    background:@bg;
+                                    border-radius:8px;
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:center;
+                                    flex-shrink:0;
+                                    margin-top:2px">
+                                    <i class="bi @icon"
+                                       style="color:@color;
+                                    font-size:15px"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold mb-1"
+                                         style="font-size:15px;
+                                        color:#1a1a2e">
+                                        @title
+                                    </div>
+                                    <div style="font-size:14px;
+                                        color:#6c757d;
+                                        line-height:1.7">
+                                        @desc
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cancellation Policy -->
+            <div id="cancellation" class="mb-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div style="width:40px;height:40px;
+                        background:#fff3cd;border-radius:10px;
+                        display:flex;align-items:center;
+                        justify-content:center;flex-shrink:0">
+                        <i class="bi bi-x-circle"
+                           style="color:#856404;font-size:18px"></i>
+                    </div>
+                    <h4 class="fw-bold mb-0" style="color:#1a1a2e">
+                        Cancellation Policy
+                    </h4>
+                </div>
+
+                <div class="card border-0 shadow-sm"
+                     style="border-radius:16px">
+                    <div class="card-body p-4">
+                        @{
+                            var cancelTerms = new[]
+                            {
+                                (
+                                    "Order Cancellation",
+                                    "bi-bag-x",
+                                    "#fff3cd","#856404",
+                                    "You may cancel an order as soon as possible, provided that the order has not already been processed or shipped. To cancel an order, please contact our customer service team immediately at 01857997575."
+                                ),
+                                (
+                                    "Already Processed Orders",
+                                    "bi-clock-history",
+                                    "#fff3cd","#856404",
+                                    "If the order has already been processed or shipped, you may need to follow our return policy upon receipt of the items. We are unable to cancel orders that are already in transit."
+                                ),
+                                (
+                                    "Pre-Order Cancellation",
+                                    "bi-calendar-x",
+                                    "#fff3cd","#856404",
+                                    "Pre-orders can only be cancelled while the status is Pending (before payment verification). Once confirmed, the pre-order cannot be cancelled and the deposit is non-refundable."
+                                ),
+                                (
+                                    "Store-Initiated Cancellation",
+                                    "bi-building-x",
+                                    "#fff3cd","#856404",
+                                    "TwentyOne reserves the right to cancel any order due to stock unavailability, pricing errors, or suspected fraudulent activity. In such cases, a full refund will be processed."
+                                ),
+                                (
+                                    "Auto-Cancellation",
+                                    "bi-alarm",
+                                    "#fff3cd","#856404",
+                                    "Pre-orders not collected within 45 days of the arrival notification will be automatically cancelled with no refund of the deposit."
+                                )
+                            };
+                        }
+
+                        @foreach (var (title, icon, bg, color, desc)
+                            in cancelTerms)
+                        {
+                            <div class="d-flex gap-3 mb-4">
+                                <div style="width:36px;height:36px;
+                                    background:@bg;
+                                    border-radius:8px;
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:center;
+                                    flex-shrink:0;
+                                    margin-top:2px">
+                                    <i class="bi @icon"
+                                       style="color:@color;
+                                    font-size:15px"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold mb-1"
+                                         style="font-size:15px;
+                                        color:#1a1a2e">
+                                        @title
+                                    </div>
+                                    <div style="font-size:14px;
+                                        color:#6c757d;
+                                        line-height:1.7">
+                                        @desc
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pre-Order Policy -->
+            <div id="preorder" class="mb-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div style="width:40px;height:40px;
+                        background:#fff0f3;border-radius:10px;
+                        display:flex;align-items:center;
+                        justify-content:center;flex-shrink:0">
+                        <i class="bi bi-clock"
+                           style="color:#e94560;font-size:18px"></i>
+                    </div>
+                    <h4 class="fw-bold mb-0" style="color:#1a1a2e">
+                        Pre-Order Policy
+                    </h4>
+                </div>
+
+                <div class="card border-0 shadow-sm"
+                     style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="alert mb-4"
+                             style="background:#fff8f0;
+                            border:1px solid #ffe0b2;
+                            border-radius:12px;
+                            font-size:13px">
+                            <i class="bi bi-info-circle me-2
+                            text-warning"></i>
+                            By submitting a pre-order you agree to
+                            all the following conditions.
+                        </div>
+
+                        @{
+                            var preorderTerms = new[]
+                            {
+                                (
+                                    "Non-Refundable Deposit",
+                                    "bi-cash-coin",
+                                    "#fff0f3","#e94560",
+                                    "A non-refundable deposit of ৳200 (or ৳500 for products priced ৳10,000 and above) is required to confirm your pre-order via bKash. This deposit is strictly non-refundable under any circumstances."
+                                ),
+                                (
+                                    "Delivery Delays",
+                                    "bi-clock-history",
+                                    "#fff0f3","#e94560",
+                                    "Pre-order products may be delayed from the scheduled arrival time due to manufacturing, shipping, or customs clearance issues. TwentyOne Diecast is not responsible for delays caused by the manufacturer or shipping carrier."
+                                ),
+                                (
+                                    "Price Variation",
+                                    "bi-currency-exchange",
+                                    "#fff0f3","#e94560",
+                                    "The price of pre-order products may vary due to currency exchange rate fluctuations between the time of pre-order and arrival. Customers will be notified of any price changes before final payment."
+                                ),
+                                (
+                                    "45-Day Collection Window",
+                                    "bi-calendar-check",
+                                    "#fff0f3","#e94560",
+                                    "You will be notified when the product arrives and must take delivery within 45 days. Failure to collect within this period will result in automatic order cancellation with no refund of the deposit."
+                                ),
+                                (
+                                    "Delivery Charges",
+                                    "bi-truck",
+                                    "#fff0f3","#e94560",
+                                    "Delivery charges are not included in the pre-order deposit and will be added at the time of final delivery. Current rates: Inside Dhaka ৳80, Outside Dhaka ৳130. Rates are subject to change."
+                                ),
+                                (
+                                    "Patience Required",
+                                    "bi-hourglass-split",
+                                    "#fff0f3","#e94560",
+                                    "Pre-ordering requires patience. Products may take weeks or months to arrive depending on the manufacturer's production schedule and international shipping timelines."
+                                )
+                            };
+                        }
+
+                        @foreach (var (title, icon, bg, color, desc)
+                            in preorderTerms)
+                        {
+                            <div class="d-flex gap-3 mb-4">
+                                <div style="width:36px;height:36px;
+                                    background:@bg;
+                                    border-radius:8px;
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:center;
+                                    flex-shrink:0;
+                                    margin-top:2px">
+                                    <i class="bi @icon"
+                                       style="color:@color;
+                                    font-size:15px"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold mb-1"
+                                         style="font-size:15px;
+                                        color:#1a1a2e">
+                                        @title
+                                    </div>
+                                    <div style="font-size:14px;
+                                        color:#6c757d;
+                                        line-height:1.7">
+                                        @desc
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact & Agreement -->
+            <div class="p-4 text-center mb-4"
+                 style="background:linear-gradient(135deg,
+                #1a1a2e,#16213e);
+                border-radius:16px;color:white">
+                <i class="bi bi-telephone"
+                   style="font-size:36px;color:#e94560;
+                margin-bottom:10px;display:block"></i>
+                <h5 class="fw-bold">Contact Us</h5>
+                <p style="color:#aaaacc;font-size:14px;
+                    margin:8px 0 4px">
+                    If you have any questions about these policies,
+                    please contact us:
+                </p>
+                <p style="color:white;font-weight:700;
+                    font-size:18px;margin-bottom:20px">
+                    01857997575
+                </p>
+                <p style="color:#aaaacc;font-size:13px;
+                    max-width:500px;margin:0 auto 20px">
+                    By using TwentyOne Diecast, you acknowledge that
+                    you have read, understood, and agree to be bound
+                    by all these Terms & Conditions.
+                </p>
+                <a href="/Home/Shop"
+                   class="btn btn-primary px-5">
+                    <i class="bi bi-shop me-2"></i>Start Shopping
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>

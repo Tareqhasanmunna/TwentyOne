@@ -1,0 +1,76 @@
+﻿
+@model TwentyOne.Web.MVC.ViewModels.LoginViewModel
+@{
+    Layout = "_PublicLayout";
+    ViewData["Title"] = "Login";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm" style="border-radius:16px">
+                <div class="card-body p-5">
+                    <h4 class="fw-bold text-center mb-1">Welcome Back</h4>
+                    <p class="text-muted text-center mb-4" style="font-size:14px">
+                        Sign in to your account
+                    </p>
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger" style="font-size:13px">
+                            <i class="bi bi-exclamation-circle me-2"></i>
+                            @Model.ErrorMessage
+                        </div>
+                    }
+
+                    <form asp-action="Login" asp-controller="Account"
+                          method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ReturnUrl" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input asp-for="Email" class="form-control"
+                                   placeholder="your@email.com" />
+                            <span asp-validation-for="Email"
+                                  class="text-danger" style="font-size:12px"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Password</label>
+                            <div class="input-group">
+                                <input asp-for="Password"
+                                       type="password"
+                                       id="loginPassword"
+                                       class="form-control"
+                                       placeholder="••••••••" />
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        onclick="togglePassword('loginPassword',
+                                    'loginEyeIcon')"
+                                        style="border-radius:0 8px 8px 0">
+                                    <i class="bi bi-eye"
+                                       id="loginEyeIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Password"
+                                  class="text-danger"
+                                  style="font-size:12px"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Sign In
+                        </button>
+                    </form>
+
+                    <p class="text-center mt-4 mb-0" style="font-size:13px">
+                        Don't have an account?
+                        <a href="/Account/Register" class="text-primary fw-semibold">
+                            Register
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,109 @@
+﻿@{
+    Layout = "_PublicLayout";
+    ViewData["Title"] = "Pre-Order Placed!";
+}
+
+<div class="container py-5">
+    <div class="text-center py-5">
+        <div style="width:90px;height:90px;background:#e8f5e9;
+            border-radius:50%;display:flex;align-items:center;
+            justify-content:center;margin:0 auto 20px">
+            <i class="bi bi-check-lg"
+               style="font-size:40px;color:#198754"></i>
+        </div>
+
+        <h2 class="fw-bold text-success">Pre-Order Placed!</h2>
+        <p class="text-muted mt-2 mb-0">
+            Thank you! Your pre-order has been received.
+        </p>
+        <p class="text-muted">
+            We will verify your bKash payment and confirm
+            your pre-order shortly.
+        </p>
+
+        @if (ViewBag.PreOrderNumber != null)
+        {
+            <div class="mt-4 p-4 d-inline-block"
+                 style="background:#f8f9fa;border-radius:12px">
+                <div class="text-muted" style="font-size:13px">
+                    Your Pre-Order Number
+                </div>
+                <div style="font-size:24px;font-weight:800;
+                    color:#1a1a2e">
+                    @ViewBag.PreOrderNumber
+                </div>
+            </div>
+        }
+
+        <div class="mt-4 p-4 mx-auto"
+             style="max-width:500px;background:#fff8f0;
+            border-radius:12px;
+            border:1px solid #ffe0b2">
+            <h6 class="fw-bold mb-3">What happens next?</h6>
+            <div class="d-flex gap-3 mb-2 text-start">
+                <div style="width:28px;height:28px;background:#e94560;
+                    border-radius:50%;display:flex;
+                    align-items:center;justify-content:center;
+                    color:white;font-size:12px;
+                    flex-shrink:0">
+                    1
+                </div>
+                <div style="font-size:13px">
+                    We verify your bKash payment
+                    <span class="text-muted">(within 24 hours)</span>
+                </div>
+            </div>
+            <div class="d-flex gap-3 mb-2 text-start">
+                <div style="width:28px;height:28px;background:#e94560;
+                    border-radius:50%;display:flex;
+                    align-items:center;justify-content:center;
+                    color:white;font-size:12px;
+                    flex-shrink:0">
+                    2
+                </div>
+                <div style="font-size:13px">
+                    Your pre-order status changes to
+                    <strong>Confirmed</strong>
+                </div>
+            </div>
+            <div class="d-flex gap-3 mb-2 text-start">
+                <div style="width:28px;height:28px;background:#e94560;
+                    border-radius:50%;display:flex;
+                    align-items:center;justify-content:center;
+                    color:white;font-size:12px;
+                    flex-shrink:0">
+                    3
+                </div>
+                <div style="font-size:13px">
+                    When the product arrives, you'll be notified
+                    and status changes to <strong>Ready</strong>
+                </div>
+            </div>
+            <div class="d-flex gap-3 text-start">
+                <div style="width:28px;height:28px;background:#e94560;
+                    border-radius:50%;display:flex;
+                    align-items:center;justify-content:center;
+                    color:white;font-size:12px;
+                    flex-shrink:0">
+                    4
+                </div>
+                <div style="font-size:13px">
+                    Pay remaining amount + delivery charge
+                    and receive your product within 45 days
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-3 justify-content-center mt-4">
+            <a href="/Account/MyPreOrders"
+               class="btn btn-primary">
+                <i class="bi bi-clock-history me-2"></i>
+                View My Pre-Orders
+            </a>
+            <a href="/Home/Shop"
+               class="btn btn-outline-primary">
+                Continue Shopping
+            </a>
+        </div>
+    </div>
+</div>

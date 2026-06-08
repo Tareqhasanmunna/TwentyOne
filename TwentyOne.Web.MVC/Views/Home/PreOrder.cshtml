@@ -1,0 +1,283 @@
+﻿@{
+    Layout = "_PublicLayout";
+    ViewData["Title"] = "Pre-Order";
+    var product = ViewBag.Product as
+        TwentyOne.Shared.DTOs.Responses.ProductResponseDto;
+    var bkashNumber = ViewBag.BkashNumber as string;
+    var apiUrl = ApiConfig.PublicBaseUrl;
+    var deposit = product?.PreOrderDeposit ?? 200;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <!-- Product Info Card -->
+            <div class="card border-0 shadow-sm mb-4"
+                 style="border-radius:16px;overflow:hidden">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        @if (product?.ImageUrls.Any() == true)
+                        {
+                            <img src="@(apiUrl + product.ImageUrls.First())"
+                                 style="width:100%;height:200px;
+                            object-fit:cover" />
+                        }
+                        else
+                        {
+                            <div style="height:200px;background:#f8f9fa;
+                                display:flex;align-items:center;
+                                justify-content:center">
+                                <i class="bi bi-car-front"
+                                   style="font-size:60px;color:#dee2e6"></i>
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body p-4">
+                            <span style="font-size:11px;color:#e94560;
+                                font-weight:600;
+                                text-transform:uppercase">
+                                @product?.BrandName
+                            </span>
+                            <h5 class="fw-bold mt-1">@product?.Name</h5>
+                            <div class="d-flex gap-3 mt-2"
+                                 style="font-size:13px;color:#6c757d">
+                                <span>
+                                    @product?.Scale
+                                </span>
+                                @if (product?.ReleaseYear.HasValue == true)
+                                {
+                                    <span>
+                                        <i class="bi bi-calendar me-1"></i>
+                                        @product.ReleaseYear
+                                    </span>
+                                }
+                            </div>
+                            <div class="mt-3">
+                                <div style="font-size:13px;color:#6c757d">
+                                    Product Price
+                                </div>
+                                <div style="font-size:22px;font-weight:800;
+                                    color:#1a1a2e">
+                                    ৳@product?.Price.ToString("N0")
+                                </div>
+                            </div>
+
+                            @if (product?.PreOrderDeadline.HasValue == true)
+                            {
+                                <div class="mt-2 p-2"
+                                     style="background:#fff8f0;
+                                    border-radius:8px;
+                                    font-size:12px">
+                                    <i class="bi bi-clock text-warning me-1"></i>
+                                    Pre-order closes:
+                                    <strong>
+                                        @product.PreOrderDeadline.Value.ToString("MMM dd, yyyy")
+                                    </strong>
+                                    (@product.PreOrderDaysRemaining days left)
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- bKash Payment Info -->
+            <div class="card border-0 mb-4"
+                 style="border-radius:16px;
+                background:linear-gradient(135deg,
+                #e2136e,#c01059);color:white">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div style="background:white;border-radius:10px;
+                            padding:8px 12px;font-weight:800;
+                            color:#e2136e;font-size:16px">
+                            bKash
+                        </div>
+                        <div>
+                            <div style="font-size:13px;opacity:0.85">
+                                Send deposit to this bKash number
+                            </div>
+                            <div style="font-size:24px;font-weight:800;
+                                letter-spacing:2px">
+                                @bkashNumber
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3"
+                         style="background:rgba(255,255,255,0.15);
+                        border-radius:10px">
+                        <div class="d-flex justify-content-between mb-1"
+                             style="font-size:13px">
+                            <span>Product Price</span>
+                            <span>৳@product?.Price.ToString("N0")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1"
+                             style="font-size:13px">
+                            <span>Deposit Required Now</span>
+                            <strong>৳@deposit.ToString("N0")</strong>
+                        </div>
+                        <div class="d-flex justify-content-between"
+                             style="font-size:13px;
+                            border-top:1px solid rgba(255,255,255,0.3);
+                            padding-top:8px;margin-top:8px">
+                            <span>Remaining (pay on delivery)</span>
+                            <strong>
+                                ৳@((product?.Price - deposit ?? 0)
+                                                                    .ToString("N0"))
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="mt-3" style="font-size:12px;opacity:0.85">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Send exactly <strong>৳@deposit</strong> via bKash
+                        Send Money to <strong>@bkashNumber</strong>
+                        then enter the Transaction ID below.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terms & Conditions -->
+            <div class="card border-0 shadow-sm mb-4"
+                 style="border-radius:16px">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-file-text me-2 text-danger"></i>
+                        Terms & Conditions
+                    </h6>
+
+                    <div class="p-3 mb-3"
+                         style="background:#f8f9fa;border-radius:10px;
+                        border-left:4px solid #e94560">
+                        <p style="font-size:13px;color:#6c757d;
+                            margin-bottom:8px">
+                            Please read carefully before proceeding:
+                        </p>
+                        <ol style="font-size:13px;color:#495057;
+                            line-height:1.8;margin:0;
+                            padding-left:20px">
+                            <li>
+                                Pre-order products may be delayed by some
+                                time from the scheduled arrival time.
+                            </li>
+                            <li>
+                                The price of pre-order products may vary
+                                due to currency rates.
+                            </li>
+                            <li>
+                                Advance payment for pre-order is
+                                <strong>non-refundable</strong>.
+                            </li>
+                            <li>
+                                You will be notified when the product
+                                arrives, and you must take delivery within
+                                <strong>45 days</strong>. Otherwise, the
+                                order will be canceled.
+                            </li>
+                            <li>
+                                Delivery charges will be added at the
+                                time of delivery.
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pre-Order Form -->
+            <div class="card border-0 shadow-sm"
+                 style="border-radius:16px">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-4">
+                        <i class="bi bi-receipt me-2"></i>
+                        Complete Pre-Order
+                    </h6>
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger"
+                             style="border-radius:10px;font-size:13px">
+                            <i class="bi bi-exclamation-circle me-2"></i>
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    <form asp-action="SubmitPreOrder"
+                          asp-controller="Home" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ProductId"
+                               value="@product?.Id" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                bKash Transaction ID
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   name="BkashTransactionId"
+                                   class="form-control"
+                                   placeholder="e.g. 8N6Y0X4A1B"
+                                   required
+                                   style="letter-spacing:2px;
+                            font-weight:600" />
+                            <small class="text-muted">
+                                The transaction ID from your bKash
+                                Send Money confirmation
+                            </small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                Your Phone Number
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   name="BkashSenderNumber"
+                                   class="form-control"
+                                   placeholder="e.g. 01700000000"
+                                   required />
+                            <small class="text-muted">
+                                We may contact you on this number for order confirmation
+                            </small>
+                        </div>
+
+                        <!-- Terms checkbox -->
+                        <div class="mb-4 p-3"
+                             style="background:#fff0f3;
+                            border-radius:10px;
+                            border:1px solid #ffd0db">
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="TermsAccepted"
+                                       id="termsCheck"
+                                       value="true"
+                                       required />
+                                <label class="form-check-label"
+                                       style="font-size:13px;
+                                    font-weight:600"
+                                       for="termsCheck">
+                                    I have read and agree to all the
+                                    terms and conditions above.
+                                    I understand the deposit of
+                                    <strong>
+                                        ৳@deposit
+                                    </strong>
+                                    is non-refundable.
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary w-100 btn-lg">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Confirm Pre-Order — ৳@deposit Deposit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

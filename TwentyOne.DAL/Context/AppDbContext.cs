@@ -22,6 +22,9 @@ namespace TwentyOne.DAL.Context
         public DbSet<WishlistItem> WishlistItems { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<Banner> Banners { get; set; }
+        public DbSet<SiteSetting> SiteSettings { get; set; }
+        public DbSet<PreOrder> PreOrders { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -41,6 +44,16 @@ namespace TwentyOne.DAL.Context
                 .WithMany(p => p.Images)
                 .HasForeignKey(pi => pi.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Decimal columns for discounts
+            builder.Entity<Product>()
+                .Property(p => p.DiscountPercentage)
+                .HasColumnType("decimal(5,2)");
+
+            // Discount amount should also be decimal(18,2) to match price columns
+            builder.Entity<Product>()
+                .Property(p => p.DiscountAmount)
+                .HasColumnType("decimal(18,2)");
 
             // Order → OrderItem (one to many)
             builder.Entity<OrderItem>()
@@ -122,6 +135,37 @@ namespace TwentyOne.DAL.Context
 
             builder.Entity<Coupon>()
                 .Property(c => c.MinimumOrderAmount)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Entity<Order>()
+                .Property(o => o.DeliveryCharge)
+                .HasColumnType("decimal(18,2)");
+
+            // User → PreOrder
+            builder.Entity<PreOrder>()
+                .HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Product → PreOrder
+            builder.Entity<PreOrder>()
+                .HasOne(p => p.Product)
+                .WithMany()
+                .HasForeignKey(p => p.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Decimal columns
+            builder.Entity<PreOrder>()
+                .Property(p => p.DepositAmount)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Entity<PreOrder>()
+                .Property(p => p.ProductPrice)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Entity<PreOrder>()
+                .Property(p => p.RemainingAmount)
                 .HasColumnType("decimal(18,2)");
         }
     }

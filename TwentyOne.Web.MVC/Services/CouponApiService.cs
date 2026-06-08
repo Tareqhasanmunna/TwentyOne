@@ -37,5 +37,12 @@ namespace TwentyOne.Web.MVC.Services
             return await PostAsync<ApiResponse<string>>(
                 $"api/coupons/{id}/toggle", new { });
         }
+
+        public async Task<ApiResponse<ApplyCouponResponseDto>?> ApplyCouponAsync(
+    ApplyCouponDto dto)
+        {
+            return await PostAsync<ApiResponse<ApplyCouponResponseDto>>(
+                "api/coupons/apply", dto);
+        }
     }
 }

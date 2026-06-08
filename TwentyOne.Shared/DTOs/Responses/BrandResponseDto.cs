@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TwentyOne.Shared.DTOs.Requests
+namespace TwentyOne.Shared.DTOs.Responses
 {
     public class BrandResponseDto
     {

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using TwentyOne.BLL.Helpers;
 using TwentyOne.BLL.Services.Interfaces;
 using TwentyOne.DAL.Entities;
 using TwentyOne.DAL.Repositories.Interfaces;
 using TwentyOne.Shared.DTOs.Requests;
+using TwentyOne.Shared.DTOs.Responses;
 using TwentyOne.Shared.Models;
 
 namespace TwentyOne.BLL.Services.Implementations
@@ -12,14 +14,26 @@ namespace TwentyOne.BLL.Services.Implementations
     public class BrandService : IBrandService
     {
         private readonly IBrandRepository _brandRepository;
+        private readonly CacheService _cache;
+        private readonly SanitizationService _sanitizer;
 
-        public BrandService(IBrandRepository brandRepository)
+        private const string CacheKey = "brands_all";
+
+        public BrandService(IBrandRepository brandRepository, CacheService cache, SanitizationService sanitizer)
         {
             _brandRepository = brandRepository;
+            _cache = cache;
+            _sanitizer = sanitizer;
         }
 
         public async Task<ApiResponse<List<BrandResponseDto>>> GetAllAsync()
         {
+            var cached = _cache.Get<List<BrandResponseDto>>(CacheKey);
+            if (cached != null)
+            {
+                return ApiResponse<List<BrandResponseDto>>.SuccessResponse(cached);
+            }
+            
             var brands = await _brandRepository.GetAllAsync();
 
             var result = brands.Select(b => new BrandResponseDto
@@ -32,6 +46,8 @@ namespace TwentyOne.BLL.Services.Implementations
                 CreatedAt = b.CreatedAt,
                 ProductCount = b.Products.Count
             }).ToList();
+
+            _cache.Set(CacheKey, result);
 
             return ApiResponse<List<BrandResponseDto>>
                 .SuccessResponse(result);
@@ -61,6 +77,10 @@ namespace TwentyOne.BLL.Services.Implementations
 
         public async Task<ApiResponse<BrandResponseDto>> CreateAsync(CreateBrandDto dto)
         {
+            // Sanitize inputs
+            dto.Name = _sanitizer.SanitizePlainText(dto.Name);
+            dto.Description = _sanitizer.Sanitize(dto.Description);
+
             // Check if brand name already exists
             var existing = await _brandRepository.GetByNameAsync(dto.Name);
             if (existing != null)
@@ -77,6 +97,8 @@ namespace TwentyOne.BLL.Services.Implementations
             };
 
             var created = await _brandRepository.CreateAsync(brand);
+
+            _cache.Remove(CacheKey);
 
             var result = new BrandResponseDto
             {
@@ -96,6 +118,10 @@ namespace TwentyOne.BLL.Services.Implementations
         public async Task<ApiResponse<BrandResponseDto>> UpdateAsync(
             int id, UpdateBrandDto dto)
         {
+            // Sanitize inputs
+            dto.Name = _sanitizer.SanitizePlainText(dto.Name);
+            dto.Description = _sanitizer.Sanitize(dto.Description);
+
             var brand = await _brandRepository.GetByIdAsync(id);
             if (brand == null)
                 return ApiResponse<BrandResponseDto>
@@ -113,6 +139,8 @@ namespace TwentyOne.BLL.Services.Implementations
             brand.IsActive = dto.IsActive;
 
             var updated = await _brandRepository.UpdateAsync(brand);
+
+            _cache.Remove(CacheKey);
 
             var result = new BrandResponseDto
             {
@@ -144,8 +172,11 @@ namespace TwentyOne.BLL.Services.Implementations
 
             await _brandRepository.DeleteAsync(brand);
 
+            _cache.Remove(CacheKey);
+
             return ApiResponse<string>
                 .SuccessResponse("Brand deleted successfully");
         }
+
     }
 }

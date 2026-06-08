@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using TwentyOne.Shared.DTOs.Requests;
+using TwentyOne.Shared.DTOs.Responses;
 using TwentyOne.Shared.Models;
 
 namespace TwentyOne.BLL.Services.Interfaces

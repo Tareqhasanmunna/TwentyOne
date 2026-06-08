@@ -1,0 +1,204 @@
+﻿@model TwentyOne.Shared.DTOs.Responses.OrderResponseDto
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Order Detail";
+}
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a href="/Admin/Orders" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h5 class="mb-0 fw-bold">Order @Model.OrderNumber</h5>
+        <p class="text-muted mb-0" style="font-size:13px">
+            Placed on @Model.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")
+        </p>
+    </div>
+    <div class="ms-auto">
+        <span class="badge badge-@Model.Status.ToLower() fs-6">
+            @Model.Status
+        </span>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Order Items -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-box-seam me-2"></i>Order Items
+            </div>
+            <div class="card-body p-0">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Product</th>
+                            <th>Unit Price</th>
+                            <th>Quantity</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <strong>@item.ProductName</strong>
+                                    <div style="font-size:11px;color:#6c757d">
+                                        @item.ProductSlug
+                                    </div>
+                                </td>
+                                <td>৳@item.UnitPrice.ToString("N0")</td>
+                                <td>@item.Quantity</td>
+                                <td>
+                                    <strong>৳@item.Subtotal.ToString("N0")</strong>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Customer Card -->
+            <div class="card border-0 shadow-sm mb-3"
+                 style="border-radius:12px">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-person me-2"></i>Customer
+                    </h6>
+                    <div class="fw-semibold">
+                        @Model.CustomerName
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.CustomerPhone))
+                    {
+                        <div class="text-muted mt-1"
+                             style="font-size:13px">
+                            <i class="bi bi-telephone me-2"></i>
+                            @Model.CustomerPhone
+                        </div>
+                    }
+                    @* Only show email if it's a real customer email *@
+                    @if (!string.IsNullOrEmpty(Model.CustomerEmail) &&
+                         Model.CustomerEmail != "guest@twentyone.com")
+                    {
+                        <div class="text-muted mt-1"
+                             style="font-size:13px">
+                            <i class="bi bi-envelope me-2"></i>
+                            @Model.CustomerEmail
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Delivery Address -->
+            <div class="card mb-4">
+                <div class="card-header fw-bold">
+                    Delivery Address
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">@Model.DeliveryAddress</p>
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <hr />
+                        <p class="mb-0 text-muted"
+                           style="font-size:13px">
+                            @Model.Notes
+                        </p>
+                    }
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted">Subtotal</span>
+                    <span>৳@Model.TotalAmount.ToString("N0")</span>
+                </div>
+                @if (Model.DiscountAmount > 0)
+                {
+                    <div class="d-flex justify-content-between text-success">
+                        <span>Discount (@Model.CouponCode)</span>
+                        <span>- ৳@Model.DiscountAmount.ToString("N0")</span>
+                    </div>
+                }
+                <div class="d-flex justify-content-between fw-bold mt-2
+                    pt-2 border-top">
+                    <span>Total</span>
+                    <span>৳@Model.FinalAmount.ToString("N0")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Info -->
+    <div class="col-md-4">
+        <!-- Customer Info -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-person me-2"></i>Customer
+            </div>
+            <div class="card-body">
+                <p class="mb-1"><strong>@Model.CustomerName</strong></p>
+                <p class="mb-1 text-muted" style="font-size:13px">
+                    @Model.CustomerEmail
+                </p>
+            </div>
+        </div>
+
+        <!-- Delivery Info -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-geo-alt me-2"></i>Delivery Address
+            </div>
+            <div class="card-body">
+                <p class="mb-1" style="font-size:14px">@Model.DeliveryAddress</p>
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <hr />
+                    <p class="mb-0 text-muted" style="font-size:13px">
+                        <strong>Notes:</strong> @Model.Notes
+                    </p>
+                }
+            </div>
+        </div>
+
+        <!-- Update Status -->
+        @if (Model.Status != "Delivered" &&
+             Model.Status != "Cancelled" &&
+             Model.Status != "Returned")
+        {
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-arrow-repeat me-2"></i>Update Status
+                </div>
+                <div class="card-body">
+                    <form asp-action="UpdateOrderStatus"
+                          asp-controller="Admin" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div class="mb-3">
+                            <select name="status" class="form-select">
+                                @if (Model.Status == "Pending")
+                                {
+                                    <option value="1">Confirmed</option>
+                                    <option value="4">Cancelled</option>
+                                }
+                                @if (Model.Status == "Confirmed")
+                                {
+                                    <option value="2">Shipped</option>
+                                }
+                                @if (Model.Status == "Shipped")
+                                {
+                                    <option value="3">Delivered</option>
+                                }
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-check-lg me-1"></i>
+                            Update Status
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</div>

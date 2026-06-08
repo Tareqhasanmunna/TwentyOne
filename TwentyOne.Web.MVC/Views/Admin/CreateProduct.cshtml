@@ -1,0 +1,488 @@
+﻿@model TwentyOne.Shared.DTOs.Requests.CreateProductDto
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Add Product";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="/Admin/Products" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h5 class="mb-0 fw-bold">Add New Product</h5>
+                <p class="text-muted mb-0" style="font-size:13px">
+                    Add a new diecast model to your catalog
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-4">
+                <form asp-action="CreateProduct"
+                      asp-controller="Admin" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">
+                                Product Name <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Name" class="form-control"
+                                   placeholder="e.g. Hot Wheels Ferrari F40" />
+                            <span asp-validation-for="Name"
+                                  class="text-danger" style="font-size:12px"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Brand <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="BrandId" class="form-select">
+                                <option value="">Select Brand</option>
+                                @foreach (var brand in ViewBag.Brands)
+                                {
+                                    <option value="@brand.Id">@brand.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="BrandId"
+                                  class="text-danger" style="font-size:12px"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Description</label>
+                            <textarea asp-for="Description"
+                                      class="form-control" rows="3"
+                                      placeholder="Describe this diecast model"></textarea>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Price (৳) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Price" type="number"
+                                   class="form-control"
+                                   placeholder="0.00" step="0.01" />
+                            <span asp-validation-for="Price"
+                                  class="text-danger" style="font-size:12px"></span>
+                        </div>
+
+                        <!-- Discount Section -->
+                        <div class="col-12">
+                            <div class="p-3"
+                                 style="background:#fff8f0;border-radius:12px;
+                                border:1px solid #ffe0b2">
+                                <label class="form-label fw-semibold mb-3">
+                                    <i class="bi bi-tag-fill me-2 text-warning"></i>
+                                    Discount (optional — set only one)
+                                </label>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label"
+                                               style="font-size:13px">
+                                            Percentage Off (%)
+                                        </label>
+                                        <div class="input-group">
+                                            <input asp-for="DiscountPercentage"
+                                                   type="number"
+                                                   class="form-control"
+                                                   placeholder="e.g. 10"
+                                                   min="0" max="100"
+                                                   step="0.1"
+                                                   oninput="previewDiscount()" />
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                        <small class="text-muted">
+                                            e.g. 10 = 10% off
+                                        </small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label"
+                                               style="font-size:13px">
+                                            Fixed Amount Off (৳)
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">৳</span>
+                                            <input asp-for="DiscountAmount"
+                                                   type="number"
+                                                   class="form-control"
+                                                   placeholder="e.g. 200"
+                                                   min="0"
+                                                   oninput="previewDiscount()" />
+                                        </div>
+                                        <small class="text-muted">
+                                            e.g. 200 = save ৳200
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <!-- Discount Preview -->
+                                <div id="discountPreview"
+                                     style="display:none;margin-top:12px;
+                                    padding:10px;background:white;
+                                    border-radius:8px;font-size:13px">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Stock Quantity <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="StockQuantity" type="number"
+                                   class="form-control" placeholder="0" />
+                            <span asp-validation-for="StockQuantity"
+                                  class="text-danger" style="font-size:12px"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Scale <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="Scale" class="form-select">
+                                <option value="">Select Scale</option>
+                                <option value="1:18">1:18</option>
+                                <option value="1:24">1:24</option>
+                                <option value="1:43">1:43</option>
+                                <option value="1:64">1:64</option>
+                                <option value="1:72">1:72</option>
+                                <option value="1:87">1:87</option>
+                            </select>
+                            <span asp-validation-for="Scale"
+                                  class="text-danger" style="font-size:12px"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Release Year
+                            </label>
+                            <input asp-for="ReleaseYear" type="number"
+                                   class="form-control"
+                                   placeholder="e.g. 2024" />
+                        </div>
+
+                        @* Pre-Order Deadline *@
+                        <div class="col-md-6" id="preOrderDeadlineField"
+                             style="display:none">
+                            <label class="form-label fw-semibold">
+                                Pre-Order Deadline
+                            </label>
+                            <input asp-for="PreOrderDeadline" type="date"
+                                   class="form-control" />
+                            <small class="text-muted">
+                                Last date customers can place pre-orders
+                            </small>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Product Images</label>
+
+                            <div id="imageUploadArea"
+                                 style="border:2px dashed #dee2e6;border-radius:12px;
+                                padding:20px;text-align:center;cursor:pointer;
+                                transition:all 0.2s;background:#fafafa"
+                                 onclick="document.getElementById('imageInput').click()"
+                                 ondragover="event.preventDefault();
+                                this.style.borderColor='#e94560'"
+                                 ondragleave="this.style.borderColor='#dee2e6'"
+                                 ondrop="handleDrop(event)">
+                                <i class="bi bi-cloud-upload"
+                                   style="font-size:36px;color:#dee2e6"></i>
+                                <p class="mb-1 mt-2"
+                                   style="font-size:14px;color:#6c757d">
+                                    Click or drag images here
+                                </p>
+                                <p class="mb-0" style="font-size:12px;color:#aaa">
+                                    JPG, PNG, WEBP — Max 5MB each —
+                                    <strong>Maximum 5 images</strong>
+                                </p>
+                            </div>
+
+                            <input type="file" id="imageInput" name="images"
+                                   multiple accept="image/jpeg,image/png,image/webp"
+                                   style="display:none" />
+
+                            <div id="imagePreviews"
+                                 style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+                            </div>
+
+                            <small class="text-muted">
+                                First image will be the primary product image.
+                            </small>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold d-block">
+                                &nbsp;
+                            </label>
+                            <div class="form-check mt-2">
+                                <input asp-for="IsLimitedEdition"
+                                       class="form-check-input" type="checkbox" />
+                                <label class="form-check-label">
+                                    Limited Edition
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold d-block">
+                                &nbsp;
+                            </label>
+                            <div class="form-check mt-2">
+                                <input asp-for="IsPreOrder"
+                                       class="form-check-input" type="checkbox" />
+                                <label class="form-check-label">
+                                    Pre-Order
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="d-flex gap-2 mt-2">
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-check-lg me-1"></i>
+                                    Create Product
+                                </button>
+                                <a href="/Admin/Products"
+                                   class="btn btn-outline-secondary px-4">
+                                    Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger" style="border-radius:10px;font-size:13px">
+        <strong>Please fix the following errors:</strong>
+        <ul class="mb-0 mt-1">
+            @foreach (var error in ViewData.ModelState.Values
+                .SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        let selectedFiles = [];
+
+        // Click to select
+        document.getElementById('imageInput')
+            .addEventListener('change', function () {
+                addFiles(Array.from(this.files));
+            });
+
+        // Drag over
+        document.getElementById('imageUploadArea')
+            .addEventListener('dragover', function (e) {
+                e.preventDefault();
+                this.style.borderColor = '#e94560';
+                this.style.background = '#fff0f3';
+            });
+
+        // Drag leave
+        document.getElementById('imageUploadArea')
+            .addEventListener('dragleave', function () {
+                if (selectedFiles.length === 0) {
+                    this.style.borderColor = '#dee2e6';
+                    this.style.background = '#fafafa';
+                }
+            });
+
+        // Drop
+        document.getElementById('imageUploadArea')
+            .addEventListener('drop', function (e) {
+                e.preventDefault();
+                addFiles(Array.from(e.dataTransfer.files)
+                    .filter(f => f.type.startsWith('image/')));
+            });
+
+        function addFiles(newFiles) {
+            // Filter image files only
+            newFiles = newFiles.filter(f =>
+                f.type.startsWith('image/'));
+
+            // Add files avoiding duplicates
+            newFiles.forEach(file => {
+                if (!selectedFiles.find(f => f.name === file.name))
+                    selectedFiles.push(file);
+            });
+
+            
+            if (selectedFiles.length > 5) {
+                selectedFiles = selectedFiles.slice(0, 5);
+                alert('Maximum 5 images allowed. ' +
+                    'Only the first 5 have been selected.');
+            }
+
+            renderPreviews();
+        }
+
+        function removeImage(index) {
+            selectedFiles.splice(index, 1);
+            renderPreviews();
+        }
+
+        function renderPreviews() {
+            const container = document.getElementById('imagePreviews');
+            container.innerHTML = '';
+            const area = document.getElementById('imageUploadArea');
+
+            if (selectedFiles.length === 0) {
+                area.style.borderColor = '#dee2e6';
+                area.style.background = '#fafafa';
+                area.innerHTML = `
+                    <i class="bi bi-cloud-upload"
+                       style="font-size:36px;color:#dee2e6"></i>
+                    <p class="mb-1 mt-2"
+                       style="font-size:14px;color:#6c757d">
+                        Click or drag images here
+                    </p>
+                    <p class="mb-0" style="font-size:12px;color:#aaa">
+                        JPG, PNG, WEBP — Max 5MB each —
+                        Maximum 5 images
+                    </p>`;
+                return;
+            }
+
+            var remaining = 5 - selectedFiles.length;
+            area.style.borderColor = '#e94560';
+            area.style.background = '#fff0f3';
+            area.innerHTML = `
+                <i class="bi bi-check-circle"
+                   style="font-size:28px;color:#e94560"></i>
+                <p class="mb-0 mt-1 fw-semibold"
+                   style="font-size:14px;color:#e94560">
+                    ${selectedFiles.length}/5 images selected
+                    ${remaining > 0
+                    ? `— click to add ${remaining} more`
+                    : ' — maximum reached'}
+                </p>`;
+
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const div = document.createElement('div');
+                    div.style.cssText =
+                        'position:relative;display:inline-block';
+                    div.innerHTML = `
+                        <img src="${e.target.result}"
+                             style="width:85px;height:85px;
+                                    object-fit:cover;
+                                    border-radius:10px;
+                                    border:2px solid ${index === 0
+                            ? '#e94560' : '#eee'};
+                                    display:block" />
+                        ${index === 0 ? `
+                            <span style="position:absolute;top:-6px;
+                                         left:-6px;background:#e94560;
+                                         color:white;border-radius:50%;
+                                         width:20px;height:20px;
+                                         display:flex;align-items:center;
+                                         justify-content:center;
+                                         font-size:10px">★</span>` : ''}
+                        <span onclick="removeImage(${index})"
+                              style="position:absolute;top:-6px;
+                                     right:-6px;background:#dc3545;
+                                     color:white;border-radius:50%;
+                                     width:20px;height:20px;
+                                     display:flex;align-items:center;
+                                     justify-content:center;
+                                     font-size:14px;cursor:pointer;
+                                     line-height:1">×</span>
+                        <small style="display:block;text-align:center;
+                                      font-size:10px;color:#6c757d;
+                                      margin-top:4px;max-width:85px;
+                                      overflow:hidden;
+                                      text-overflow:ellipsis;
+                                      white-space:nowrap">
+                            ${index === 0 ? 'Primary'
+                            : 'Image ' + (index + 1)}
+                        </small>`;
+                    container.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Override form submit to attach files
+        document.querySelector('form')
+            .addEventListener('submit', function (e) {
+                if (selectedFiles.length === 0) return;
+
+                e.preventDefault();
+
+                const dt = new DataTransfer();
+                selectedFiles.forEach(f => dt.items.add(f));
+                document.getElementById('imageInput').files = dt.files;
+
+                this.submit();
+            });
+
+        // --- Toggle Pre-Order Deadline Field ---
+        document.getElementById('IsPreOrder')
+            .addEventListener('change', function () {
+                document.getElementById('preOrderDeadlineField')
+                    .style.display = this.checked ? 'block' : 'none';
+            });
+
+        // Show on load if already checked
+        if (document.getElementById('IsPreOrder').checked) {
+            document.getElementById('preOrderDeadlineField')
+                .style.display = 'block';
+        }
+
+        function previewDiscount() {
+            var price = parseFloat(
+                document.querySelector('[name="Price"]').value) || 0;
+            var pct = parseFloat(
+                document.querySelector(
+                    '[name="DiscountPercentage"]').value) || 0;
+            var amt = parseFloat(
+                document.querySelector(
+                    '[name="DiscountAmount"]').value) || 0;
+
+            var preview = document.getElementById('discountPreview');
+
+            if (price === 0) {
+                preview.style.display = 'none';
+                return;
+            }
+
+            if (pct > 0) {
+                var discounted = price - (price * pct / 100);
+                preview.innerHTML = `
+                            <span class="text-muted text-decoration-line-through
+                                         me-2">৳${price.toLocaleString()}</span>
+                            <span class="fw-bold text-danger">
+                                ৳${discounted.toLocaleString()}</span>
+                            <span class="badge ms-2"
+                                  style="background:#e94560">
+                                ${pct}% OFF</span>`;
+                preview.style.display = 'block';
+            } else if (amt > 0) {
+                var discounted = price - amt;
+                preview.innerHTML = `
+                            <span class="text-muted text-decoration-line-through
+                                         me-2">৳${price.toLocaleString()}</span>
+                            <span class="fw-bold text-danger">
+                                ৳${discounted.toLocaleString()}</span>
+                            <span class="badge ms-2"
+                                  style="background:#e94560">
+                                Save ৳${amt.toLocaleString()}</span>`;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+    </script>
+}

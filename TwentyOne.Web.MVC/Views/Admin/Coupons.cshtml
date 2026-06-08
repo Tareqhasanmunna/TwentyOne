@@ -1,0 +1,137 @@
+﻿@model List<TwentyOne.Shared.DTOs.Responses.CouponResponseDto>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Coupons";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="mb-1 fw-bold">Coupons</h5>
+        <p class="text-muted mb-0" style="font-size:13px">
+            Manage discount coupons
+        </p>
+    </div>
+    <a href="/Admin/CreateCoupon" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Add Coupon
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th class="ps-4">Code</th>
+                    <th>Type</th>
+                    <th>Value</th>
+                    <th>Min Order</th>
+                    <th>Usage</th>
+                    <th>Expiry</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var coupon in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <strong>@coupon.Code</strong>
+                            </td>
+                            <td style="font-size:13px">@coupon.DiscountType</td>
+                            <td>
+                                @if (coupon.DiscountType == "Percentage")
+                                {
+                                    <span>@coupon.DiscountValue%</span>
+                                }
+                                else
+                                {
+                                    <span>৳@coupon.DiscountValue.ToString("N0")</span>
+                                }
+                            </td>
+                            <td style="font-size:13px">
+                                @(coupon.MinimumOrderAmount.HasValue
+                                    ? $"৳{coupon.MinimumOrderAmount:N0}"
+                                    : "-")
+                            </td>
+                            <td style="font-size:13px">
+                                @coupon.UsageCount
+                                @(coupon.UsageLimit.HasValue
+                                    ? $"/ {coupon.UsageLimit}"
+                                    : "/ ∞")
+                            </td>
+                            <td style="font-size:13px">
+                                @if (coupon.IsExpired)
+                                {
+                                    <span class="text-danger">
+                                        @coupon.ExpiryDate.ToString("MMM dd, yyyy")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>@coupon.ExpiryDate.ToString("MMM dd, yyyy")</span>
+                                }
+                            </td>
+                            <td>
+                                @if (coupon.IsExpired)
+                                {
+                                    <span class="badge bg-danger">Expired</span>
+                                }
+                                else if (coupon.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </td>
+                            <td>
+                                <form asp-action="ToggleCoupon"
+                                      asp-controller="Admin"
+                                      method="post" style="display:inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id"
+                                           value="@coupon.Id" />
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-secondary me-1"
+                                            title="Toggle Active">
+                                        <i class="bi bi-toggle-on"></i>
+                                    </button>
+                                </form>
+                                <form asp-action="DeleteCoupon"
+                                      asp-controller="Admin"
+                                      method="post" style="display:inline"
+                                      onsubmit="return confirm('Delete this coupon?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id"
+                                           value="@coupon.Id" />
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-5">
+                            <i class="bi bi-ticket-perforated"
+                               style="font-size:40px;opacity:0.2"></i>
+                            <p class="mt-2 mb-0">No coupons yet</p>
+                            <a href="/Admin/CreateCoupon"
+                               class="btn btn-primary btn-sm mt-2">
+                                Create first coupon
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

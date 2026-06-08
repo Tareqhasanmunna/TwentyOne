@@ -40,5 +40,10 @@ namespace TwentyOne.DAL.Entities
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public ICollection<WishlistItem> WishlistItems { get; set; } = new List<WishlistItem>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public DateTime? PreOrderDeadline { get; set; }
+        public decimal PreOrderDeposit { get; set; } = 200;
+        public decimal? DiscountPercentage { get; set; }
+        public decimal? DiscountAmount { get; set; }
+        public bool HasDiscount => (DiscountPercentage > 0 || DiscountAmount > 0);
     }
 }

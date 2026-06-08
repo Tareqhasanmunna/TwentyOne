@@ -4,8 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewData["Title"] - TwentyOne Admin</title>
+
+    @{
+        var faviconUrl = ViewBag.SiteLogo as string;
+        var apiBase = ApiConfig.PublicBaseUrl;
+    }
+    @if (!string.IsNullOrEmpty(faviconUrl))
+    {
+        <link rel="icon" type="image/png"
+              href="@(apiBase + faviconUrl)" />
+        <link rel="apple-touch-icon"
+              href="@(apiBase + faviconUrl)" />
+    }
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link herf="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
             body { background: #f4f6f9; }
 
@@ -138,41 +152,97 @@
 </head>
 <body>
 
+
     <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-brand">
-            <h4><i class="bi bi-car-front-fill"></i> TwentyOne</h4>
+            <h4>
+                @if (!string.IsNullOrEmpty(ViewBag.SiteLogo as string))
+                {
+                    <img src="@("http://localhost:5300" + ViewBag.SiteLogo)"
+                         style="width:28px;height:28px;object-fit:contain;
+                    border-radius:6px;margin-right:6px" />
+                }
+                else
+                {
+                    <i class="bi bi-car-front-fill"></i>
+                }
+                TwentyOne
+            </h4>
             <small>Admin Panel</small>
         </div>
+        @{
+            var sessionRoles = Context.Session.GetString("UserRoles") ?? "";
+            var isSuperAdmin = sessionRoles.Contains("SuperAdmin");
+        }
 
         <nav class="nav flex-column">
             <span class="sidebar-section">Main</span>
-            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")"
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]
+                       ?.ToString() == "Dashboard" ? "active" : "")"
                href="/Admin/Dashboard">
                 <i class="bi bi-speedometer2"></i> Dashboard
             </a>
 
+            <span class="sidebar-section">Appearance</span>
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]
+                       ?.ToString() == "Interface" ? "active" : "")"
+               href="/Admin/Interface">
+                <i class="bi bi-palette"></i> Interface
+            </a>
+
             <span class="sidebar-section">Catalog</span>
-            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString()?.StartsWith("Brand") == true ? "active" : "")"
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]
+                       ?.ToString()?.StartsWith("Brand") == true ? "active" : "")"
                href="/Admin/Brands">
                 <i class="bi bi-tag-fill"></i> Brands
             </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString()?.StartsWith("Product") == true ? "active" : "")"
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]
+                       ?.ToString()?.StartsWith("Product") == true ? "active" : "")"
                href="/Admin/Products">
                 <i class="bi bi-box-seam"></i> Products
             </a>
 
             <span class="sidebar-section">Sales</span>
-            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString()?.StartsWith("Order") == true ? "active" : "")"
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]
+                       ?.ToString()?.StartsWith("Order") == true &&
+                       !ViewContext.RouteData.Values["action"]
+                       ?.ToString()?.StartsWith("OrderDetail") == true
+                       ? "active" : "")"
                href="/Admin/Orders">
                 <i class="bi bi-receipt"></i> Orders
             </a>
-            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString()?.StartsWith("Coupon") == true ? "active" : "")"
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]
+                       ?.ToString()?.StartsWith("PreOrder") == true ? "active" : "")"
+               href="/Admin/PreOrders">
+                <i class="bi bi-clock-history"></i> Pre-Orders
+            </a>
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]
+                       ?.ToString()?.StartsWith("Coupon") == true ? "active" : "")"
                href="/Admin/Coupons">
                 <i class="bi bi-ticket-perforated"></i> Coupons
             </a>
 
+
+            @if (isSuperAdmin)
+            {
+                <span class="sidebar-section">Super Admin</span>
+                <a class="nav-link @(ViewContext.RouteData.Values["action"]
+                           ?.ToString() == "AdminList" ? "active" : "")"
+                   href="/Admin/AdminList">
+                    <i class="bi bi-people"></i> Admin List
+                </a>
+                <a class="nav-link @(ViewContext.RouteData.Values["action"]
+                           ?.ToString() == "CreateAdmin" ? "active" : "")"
+                   href="/Admin/CreateAdmin">
+                    <i class="bi bi-person-plus"></i> Create Admin
+                </a>
+            }
+
             <span class="sidebar-section">Account</span>
+            <a class="nav-link" href="/" target="_blank">
+                <i class="bi bi-house"></i> View Store
+            </a>
             <a class="nav-link" href="/Admin/Logout">
                 <i class="bi bi-box-arrow-right"></i> Logout
             </a>

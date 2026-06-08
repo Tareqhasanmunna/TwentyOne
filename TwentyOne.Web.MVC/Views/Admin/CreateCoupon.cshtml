@@ -1,0 +1,122 @@
+﻿@model TwentyOne.Shared.DTOs.Requests.CreateCouponDto
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Create Coupon";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="/Admin/Coupons" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h5 class="mb-0 fw-bold">Create Coupon</h5>
+                <p class="text-muted mb-0" style="font-size:13px">
+                    Add a new discount coupon
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-4">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger"
+                         style="border-radius:10px;font-size:13px">
+                        <strong>Please fix the following errors:</strong>
+                        <ul class="mb-0 mt-1">
+                            @foreach (var error in ViewData.ModelState.Values
+                                .SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form asp-action="CreateCoupon"
+                      asp-controller="Admin" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Coupon Code <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Code" class="form-control"
+                                   placeholder="e.g. SAVE20"
+                                   style="text-transform:uppercase" />
+                            <span asp-validation-for="Code"
+                                  class="text-danger" style="font-size:12px"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Discount Type <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="DiscountType" class="form-select">
+                                <option value="0">Percentage (%)</option>
+                                <option value="1">Fixed Amount (৳)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Discount Value <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="DiscountValue" type="number"
+                                   class="form-control"
+                                   placeholder="e.g. 10 for 10% or 200 for ৳200"
+                                   step="0.01" />
+                            <span asp-validation-for="DiscountValue"
+                                  class="text-danger" style="font-size:12px"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Minimum Order Amount
+                            </label>
+                            <input asp-for="MinimumOrderAmount" type="number"
+                                   class="form-control"
+                                   placeholder="e.g. 500 (optional)"
+                                   step="0.01" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Usage Limit
+                            </label>
+                            <input asp-for="UsageLimit" type="number"
+                                   class="form-control"
+                                   placeholder="Leave empty for unlimited" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Expiry Date <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="ExpiryDate" type="date"
+                                   class="form-control" />
+                            <span asp-validation-for="ExpiryDate"
+                                  class="text-danger" style="font-size:12px"></span>
+                        </div>
+
+                        <div class="col-12 mt-2">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-check-lg me-1"></i>
+                                    Create Coupon
+                                </button>
+                                <a href="/Admin/Coupons"
+                                   class="btn btn-outline-secondary px-4">
+                                    Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

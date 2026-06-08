@@ -50,11 +50,12 @@ namespace TwentyOne.DAL.Repositories.Implementations
             // Filter by limited edition
             if (filter.IsLimitedEdition.HasValue)
                 query = query.Where(p =>
-                    p.IsLimitedEdition == filter.IsLimitedEdition);
+                    p.IsLimitedEdition == filter.IsLimitedEdition.Value);
 
             // Filter by pre-order
             if (filter.IsPreOrder.HasValue)
-                query = query.Where(p => p.IsPreOrder == filter.IsPreOrder);
+                query = query.Where(p =>
+                    p.IsPreOrder == filter.IsPreOrder.Value);
 
             // Filter by in stock
             if (filter.InStockOnly.HasValue && filter.InStockOnly.Value)

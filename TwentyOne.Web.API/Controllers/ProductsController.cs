@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using TwentyOne.BLL.Services.Interfaces;
 using TwentyOne.Shared.DTOs.Requests;
@@ -7,6 +8,7 @@ namespace TwentyOne.Web.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableCors("PublicCors")]
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;

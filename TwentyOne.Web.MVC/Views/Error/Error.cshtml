@@ -1,0 +1,68 @@
+﻿@{
+    Layout = "_PublicLayout";
+    ViewData["Title"] = "Error";
+    var statusCode = ViewBag.StatusCode ?? 500;
+    var message = ViewBag.Message ?? "Something went wrong";
+}
+
+<div class="container py-5">
+    <div class="text-center py-5">
+        <div style="font-size:120px;font-weight:900;
+            color:#e94560;line-height:1;opacity:0.15">
+            @statusCode
+        </div>
+        <div style="margin-top:-40px">
+            
+                <i class="bi bi-exclamation-triangle"
+                   style="font-size:70px;color:#e94560;
+                opacity:0.6"></i>
+        </div>
+        <h2 class="fw-bold mt-3" style="color:#1a1a2e">
+            @message
+        </h2>
+        <p class="text-muted mt-2 mb-4"
+           style="font-size:15px;max-width:450px;margin:0 auto">
+            @if (statusCode == 403)
+            {
+                <span>
+                    You don't have permission to access this page.
+                    Please login with the correct account.
+                </span>
+            }
+            else if (statusCode == 500)
+            {
+                <span>
+                    Something went wrong on our end.
+                    Please try again later or contact support.
+                </span>
+            }
+            else
+            {
+                <span>
+                    An unexpected error occurred.
+                    Please try again.
+                </span>
+            }
+        </p>
+
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="/" class="btn btn-primary px-4">
+                <i class="bi bi-house me-2"></i>Go Home
+            </a>
+            <button onclick="history.back()"
+                    class="btn btn-outline-secondary px-4">
+                <i class="bi bi-arrow-left me-2"></i>Go Back
+            </button>
+        </div>
+
+        @if (statusCode == 403)
+        {
+            <div class="mt-4">
+                <a href="/Account/Login"
+                   class="btn btn-outline-primary px-4">
+                    <i class="bi bi-person me-2"></i>Login
+                </a>
+            </div>
+        }
+    </div>
+</div>

@@ -3,6 +3,10 @@
     ViewData["Title"] = "Dashboard";
 }
 
+@{
+    var debugRoles = Context.Session.GetString("UserRoles");
+}
+
 <div class="row g-4 mb-4">
     <div class="col-md-3">
         <div class="stat-card" style="background:linear-gradient(135deg,#e94560,#c73652)">
@@ -41,8 +45,8 @@
         <div class="stat-card" style="background:linear-gradient(135deg,#ffc107,#e0a800)">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <div style="font-size:13px;opacity:0.15">Pending Orders</div>
-                    <div style="font-size:32px;font-weight:700;color:#000">
+                    <div style="font-size:13px;opacity:0.85">Pending Orders</div>
+                    <div style="font-size:32px;font-weight:700;color:white">
                         @ViewBag.PendingOrders
                     </div>
                 </div>
@@ -110,3 +114,95 @@
         </table>
     </div>
 </div>
+@{
+    var lowStock = ViewBag.LowStockProducts as
+        List<TwentyOne.Shared.DTOs.Responses.ProductResponseDto>;
+    var outOfStock = ViewBag.OutOfStockProducts as
+        List<TwentyOne.Shared.DTOs.Responses.ProductResponseDto>;
+}
+
+<!-- Stock Alerts -->
+@if ((outOfStock?.Count ?? 0) > 0 ||
+     (lowStock?.Count ?? 0) > 0)
+{
+    <div class="row g-4 mb-4">
+        @if ((outOfStock?.Count ?? 0) > 0)
+        {
+            <div class="col-md-6">
+                <div class="card border-0"
+                     style="border-radius:12px;
+                    border-left:4px solid
+                    #dc3545 !important;
+                    border:1px solid #f5c6cb">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center
+                            gap-2 mb-3">
+                            <i class="bi bi-exclamation-triangle-fill
+                            text-danger"></i>
+                            <strong style="font-size:14px">
+                                Out of Stock
+                                (@outOfStock!.Count products)
+                            </strong>
+                        </div>
+                        @foreach (var p in outOfStock!.Take(5))
+                        {
+                            <div class="d-flex justify-content-between
+                                align-items-center mb-2"
+                                 style="font-size:13px">
+                                <span>@p.Name</span>
+                                <a href="/Admin/EditProduct/@p.Id"
+                                   class="btn btn-xs btn-outline-danger"
+                                   style="font-size:11px;
+                                    padding:2px 8px">
+                                    Update
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if ((lowStock?.Count ?? 0) > 0)
+        {
+            <div class="col-md-6">
+                <div class="card border-0"
+                     style="border-radius:12px;
+                    border:1px solid #ffc107">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center
+                            gap-2 mb-3">
+                            <i class="bi bi-exclamation-circle-fill
+                            text-warning"></i>
+                            <strong style="font-size:14px">
+                                Low Stock
+                                (@lowStock!.Count products)
+                            </strong>
+                        </div>
+                        @foreach (var p in lowStock!.Take(5))
+                        {
+                            <div class="d-flex justify-content-between
+                                align-items-center mb-2"
+                                 style="font-size:13px">
+                                <span>
+                                    @p.Name
+                                    <span class="badge bg-warning
+                                        text-dark ms-1"
+                                          style="font-size:10px">
+                                        @p.StockQuantity left
+                                    </span>
+                                </span>
+                                <a href="/Admin/EditProduct/@p.Id"
+                                   class="btn btn-xs btn-outline-warning"
+                                   style="font-size:11px;
+                                    padding:2px 8px">
+                                    Update
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

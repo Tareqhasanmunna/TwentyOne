@@ -1,0 +1,229 @@
+﻿@model TwentyOne.Shared.DTOs.Responses.PagedResponseDto<TwentyOne.Shared.DTOs.Responses.ProductResponseDto>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Products";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="mb-1 fw-bold">All Products</h5>
+        <p class="text-muted mb-0" style="font-size:13px">
+            Manage your diecast collection
+        </p>
+    </div>
+    <a href="/Admin/CreateProduct" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Add Product
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form method="get" action="/Admin/Products"
+              class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <input type="text" name="search"
+                       value="@ViewBag.CurrentSearch"
+                       class="form-control form-control-sm"
+                       placeholder="Search products..." />
+            </div>
+            <div class="col-md-4">
+                <select name="brandId" class="form-select form-select-sm">
+                    <option value="">All Brands</option>
+                    @foreach (var brand in ViewBag.Brands)
+                    {
+                        <option value="@brand.Id"
+                                selected="@(ViewBag.CurrentBrandId == brand.Id)">
+                            @brand.Name
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-search me-1"></i> Filter
+                </button>
+                <a href="/Admin/Products"
+                   class="btn btn-outline-secondary btn-sm w-100">
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Products Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th class="ps-4">#</th>
+                    <th>Product</th>
+                    <th>Brand</th>
+                    <th>Scale</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Badges</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Items.Any())
+                {
+                    foreach (var product in Model.Items)
+                    {
+                        <tr>
+                            <td class="ps-4 text-muted">@product.Id</td>
+                            <td>
+                                <strong>@product.Name</strong>
+                                <div style="font-size:11px;color:#6c757d">
+                                    @product.Slug
+                                </div>
+                            </td>
+                            <td style="font-size:13px">@product.BrandName</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    @product.Scale
+                                </span>
+                            </td>
+                            <td>
+                                @if (product.HasDiscount)
+                                {
+                                    <div class="text-muted text-decoration-line-through"
+                                         style="font-size:11px">
+                                        ৳@product.Price.ToString("N0")
+                                    </div>
+                                    <strong class="text-danger">
+                                        ৳@product.DiscountedPrice.ToString("N0")
+                                    </strong>
+                                    <span class="badge ms-1"
+                                          style="background:#e94560;font-size:9px">
+                                        @product.DiscountLabel
+                                    </span>
+                                }
+                                else
+                                {
+                                    <strong>৳@product.Price.ToString("N0")</strong>
+                                }
+                            </td>
+                            <td>
+                                @if (product.StockQuantity == 0)
+                                {
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                }
+                                else if (product.StockQuantity <= 5)
+                                {
+                                    <span class="badge bg-warning text-dark">
+                                        Low (@product.StockQuantity)
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">
+                                        @product.StockQuantity
+                                    </span>
+                                }
+                                <!-- Quick stock update -->
+                                <form asp-action="UpdateStock"
+                                      asp-controller="Admin"
+                                      method="post"
+                                      class="d-flex gap-1 mt-1">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId"
+                                           value="@product.Id" />
+                                    <input type="number" name="newStock"
+                                           value="@product.StockQuantity"
+                                           class="form-control form-control-sm"
+                                           style="width:65px"
+                                           min="0" />
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            title="Update stock">
+                                        <i class="bi bi-check"></i>
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                @if (product.IsLimitedEdition)
+                                {
+                                    <span class="badge bg-warning text-dark me-1">
+                                        Limited
+                                    </span>
+                                }
+                                @if (product.IsPreOrder)
+                                {
+                                    <span class="badge bg-info text-dark">
+                                        Pre-Order
+                                    </span>
+                                }
+                                @if (product.IsArchived)
+                                {
+                                    <span class="badge bg-secondary">
+                                        Archived
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <a href="/Admin/EditProduct/@product.Id"
+                                   class="btn btn-sm btn-outline-primary me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="DeleteProduct"
+                                      asp-controller="Admin"
+                                      method="post"
+                                      style="display:inline"
+                                      onsubmit="return confirm('Delete this product?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id"
+                                           value="@product.Id" />
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-5">
+                            <i class="bi bi-box-seam"
+                               style="font-size:40px;opacity:0.2"></i>
+                            <p class="mt-2 mb-0">No products found</p>
+                            <a href="/Admin/CreateProduct"
+                               class="btn btn-primary btn-sm mt-2">
+                                Add your first product
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model != null && Model.TotalPages > 1)
+    {
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing @Model.Items.Count of @Model.TotalCount products
+            </small>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.Page ? "active" : "")">
+                            <a class="page-link"
+                               href="/Admin/Products?page=@i&search=@ViewBag.CurrentSearch&brandId=@ViewBag.CurrentBrandId">
+                                @i
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+</div>

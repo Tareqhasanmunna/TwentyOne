@@ -1,9 +1,11 @@
-﻿using TwentyOne.BLL.Services.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+using TwentyOne.BLL.Helpers;
+using TwentyOne.BLL.Services.Interfaces;
 using TwentyOne.DAL.Entities;
-using TwentyOne.Shared.Enums;
 using TwentyOne.DAL.Repositories.Interfaces;
 using TwentyOne.Shared.DTOs.Requests;
 using TwentyOne.Shared.DTOs.Responses;
+using TwentyOne.Shared.Enums;
 using TwentyOne.Shared.Models;
 
 namespace TwentyOne.BLL.Services.Implementations
@@ -12,13 +14,19 @@ namespace TwentyOne.BLL.Services.Implementations
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IProductRepository _productRepository;
+        private readonly SanitizationService _sanitizer;
+        private readonly ILogger<OrderService> _logger;
 
         public OrderService(
             IOrderRepository orderRepository,
-            IProductRepository productRepository)
+            IProductRepository productRepository,
+            SanitizationService sanitizer,
+            ILogger<OrderService> logger)
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
+            _sanitizer = sanitizer;
+            _logger = logger;
         }
 
         public async Task<ApiResponse<List<OrderResponseDto>>> GetAllAsync()
@@ -48,8 +56,16 @@ namespace TwentyOne.BLL.Services.Implementations
         }
 
         public async Task<ApiResponse<OrderResponseDto>> PlaceOrderAsync(
-            string userId, CreateOrderDto dto)
+            string? userId, CreateOrderDto dto)
         {
+            // Sanitize inputs
+            dto.DeliveryAddress = _sanitizer
+                .SanitizePlainText(dto.DeliveryAddress);
+            dto.Notes = _sanitizer
+                .SanitizePlainText(dto.Notes);
+            dto.CouponCode = _sanitizer
+                .SanitizePlainText(dto.CouponCode);
+
             // Validate all items and calculate total
             var orderItems = new List<OrderItem>();
             decimal totalAmount = 0;
@@ -61,29 +77,43 @@ namespace TwentyOne.BLL.Services.Implementations
 
                 if (product == null)
                     return ApiResponse<OrderResponseDto>
-                        .FailResponse($"Product with ID {item.ProductId} not found");
+                        .FailResponse(
+                            $"Product {item.ProductId} not found");
 
                 if (product.IsArchived)
                     return ApiResponse<OrderResponseDto>
-                        .FailResponse($"{product.Name} is no longer available");
+                        .FailResponse(
+                            $"{product.Name} is no longer available");
 
                 if (product.StockQuantity < item.Quantity)
                     return ApiResponse<OrderResponseDto>
-                        .FailResponse($"Insufficient stock for {product.Name}. " +
-                            $"Available: {product.StockQuantity}");
+                        .FailResponse(
+                            $"Insufficient stock for {product.Name}");
 
-                var subtotal = product.Price * item.Quantity;
+                // Calculate actual selling price
+                decimal sellingPrice = product.Price;
+
+                if (product.DiscountPercentage > 0)
+                    sellingPrice = product.Price -
+                        (product.Price *
+                         product.DiscountPercentage.Value / 100);
+                else if (product.DiscountAmount > 0)
+                    sellingPrice = product.Price -
+                        product.DiscountAmount.Value;
+
+                if (sellingPrice < 0) sellingPrice = 0;
+
+                var subtotal = sellingPrice * item.Quantity;
                 totalAmount += subtotal;
 
                 orderItems.Add(new OrderItem
                 {
                     ProductId = item.ProductId,
                     Quantity = item.Quantity,
-                    UnitPrice = product.Price,
+                    UnitPrice = sellingPrice,
                     Subtotal = subtotal
                 });
 
-                // Deduct stock
                 product.StockQuantity -= item.Quantity;
                 await _productRepository.UpdateAsync(product);
             }
@@ -94,13 +124,16 @@ namespace TwentyOne.BLL.Services.Implementations
             var order = new Order
             {
                 OrderNumber = orderNumber,
+                CustomerName = dto.CustomerName,
+                CustomerPhone = dto.CustomerPhone,
                 UserId = userId,
                 DeliveryAddress = dto.DeliveryAddress,
                 Notes = dto.Notes,
                 CouponCode = dto.CouponCode,
+                DeliveryCharge = dto.DeliveryCharge,
                 TotalAmount = totalAmount,
-                DiscountAmount = 0,
-                FinalAmount = totalAmount,
+                DiscountAmount = dto.DiscountAmount,
+                FinalAmount = totalAmount + dto.DeliveryCharge - dto.DiscountAmount,
                 Status = OrderStatus.Pending,
                 CreatedAt = DateTime.UtcNow,
                 OrderItems = orderItems
@@ -109,9 +142,12 @@ namespace TwentyOne.BLL.Services.Implementations
             var created = await _orderRepository.CreateAsync(order);
             var result = await _orderRepository.GetByIdAsync(created.Id);
 
+            _logger.LogInformation("Order placed: {OrderNumber} for user: {UserId}", order.OrderNumber, userId);
+
             return ApiResponse<OrderResponseDto>
                 .SuccessResponse(MapToDto(result!), "Order placed successfully");
         }
+
 
         public async Task<ApiResponse<OrderResponseDto>> UpdateStatusAsync(
             int id, UpdateOrderStatusDto dto)
@@ -145,13 +181,17 @@ namespace TwentyOne.BLL.Services.Implementations
                 return ApiResponse<string>.FailResponse("Order not found");
 
             // Only the owner can cancel their order
-            if (order.UserId != userId)
+            if (string.IsNullOrEmpty(order.UserId) || order.UserId != userId)
                 return ApiResponse<string>.FailResponse("Unauthorized");
 
             // Can only cancel pending orders
             if (order.Status != OrderStatus.Pending)
                 return ApiResponse<string>.FailResponse(
                     "Only pending orders can be cancelled");
+
+            // Can only cancel pending orders
+            if (order.Status != OrderStatus.Pending)
+                return ApiResponse<string>.FailResponse("Only pending orders can be cancelled");
 
             // Restore stock
             foreach (var item in order.OrderItems)
@@ -194,17 +234,19 @@ namespace TwentyOne.BLL.Services.Implementations
             return new OrderResponseDto
             {
                 Id = order.Id,
+                CustomerName = order.User?.FullName ?? order.CustomerName,
+                CustomerPhone = order.CustomerPhone,
+                CustomerEmail = order.User?.Email ?? string.Empty,
                 OrderNumber = order.OrderNumber,
                 TotalAmount = order.TotalAmount,
                 DiscountAmount = order.DiscountAmount,
+                DeliveryCharge = order.DeliveryCharge,
                 FinalAmount = order.FinalAmount,
                 Status = order.Status.ToString(),
                 CouponCode = order.CouponCode,
                 DeliveryAddress = order.DeliveryAddress,
                 Notes = order.Notes,
                 CreatedAt = order.CreatedAt,
-                CustomerName = order.User?.FullName ?? string.Empty,
-                CustomerEmail = order.User?.Email ?? string.Empty,
                 Items = order.OrderItems?.Select(oi => new OrderItemResponseDto
                 {
                     Id = oi.Id,
@@ -216,6 +258,21 @@ namespace TwentyOne.BLL.Services.Implementations
                     Subtotal = oi.Subtotal
                 }).ToList() ?? new()
             };
+        }
+
+        public async Task<ApiResponse<OrderResponseDto>>
+        GetByOrderNumberAsync(string orderNumber)
+        {
+            var order = await _orderRepository
+                .GetByOrderNumberAsync(orderNumber);
+
+            if (order == null)
+                return ApiResponse<OrderResponseDto>
+                    .FailResponse("Order not found. " +
+                        "Please check your order number.");
+
+            return ApiResponse<OrderResponseDto>
+                .SuccessResponse(MapToDto(order));
         }
     }
 }

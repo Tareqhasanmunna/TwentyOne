@@ -1,0 +1,43 @@
+﻿@model List<TwentyOne.Shared.DTOs.Responses.BrandResponseDto>
+@{
+    Layout = "_PublicLayout";
+    ViewData["Title"] = "All Brands";
+    var apiUrl = ApiConfig.PublicBaseUrl;
+}
+
+<div class="container py-5">
+    <h4 class="fw-bold mb-4">All Brands</h4>
+    <div class="row g-4">
+        @foreach (var brand in Model)
+        {
+            <div class="col-6 col-md-3 col-lg-2">
+                <a href="/Home/Shop?brandId=@brand.Id"
+                   class="d-block text-center text-decoration-none p-3"
+                   style="background:white;border-radius:12px;
+                    border:1.5px solid #e9ecef;transition:all 0.2s"
+                   onmouseover="this.style.borderColor='#e94560'"
+                   onmouseout="this.style.borderColor='#e9ecef'">
+                    @if (!string.IsNullOrEmpty(brand.LogoUrl))
+                    {
+                        <img src="@(apiUrl + brand.LogoUrl)"
+                             style="height:50px;width:100%;
+                        object-fit:contain;margin-bottom:10px" />
+                    }
+                    else
+                    {
+                        <i class="bi bi-tag-fill d-block mb-2"
+                           style="font-size:30px;color:#e94560"></i>
+                    }
+                    <div class="fw-semibold" style="font-size:13px;
+                        color:#1a1a2e">
+                        @brand.Name
+                    </div>
+                    <div class="text-muted" style="font-size:11px">
+                        @brand.ProductCount models
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</div>
+

@@ -24,6 +24,28 @@ namespace TwentyOne.Web.MVC.Services
 
             if (filter.BrandId.HasValue)
                 query += $"&brandId={filter.BrandId}";
+            if (!string.IsNullOrEmpty(filter.Scale))
+                query += $"&scale={filter.Scale}";
+
+            if (filter.MinPrice.HasValue)
+                query += $"&minPrice={filter.MinPrice}";
+
+            if (filter.MaxPrice.HasValue)
+                query += $"&maxPrice={filter.MaxPrice}";
+
+            if (filter.IsLimitedEdition.HasValue)
+                query += $"&isLimitedEdition={filter.IsLimitedEdition.Value.ToString().ToLower()}";
+
+            if (filter.IsPreOrder.HasValue)
+                query += $"&isPreOrder={filter.IsPreOrder.Value.ToString().ToLower()}";
+
+            if (filter.InStockOnly.HasValue)
+                query += $"&inStockOnly={filter.InStockOnly.Value.ToString().ToLower()}";
+
+            if (!string.IsNullOrEmpty(filter.SortBy))
+                query += $"&sortBy={filter.SortBy}";
+
+            
 
             var result = await GetAsync<ApiResponse<PagedResponseDto<ProductResponseDto>>>(query);
             return result;
@@ -53,6 +75,12 @@ namespace TwentyOne.Web.MVC.Services
         {
             return await DeleteAsync<ApiResponse<string>>(
                 $"api/products/{id}");
+        }
+
+        public async Task<ApiResponse<ProductResponseDto>?> GetBySlugAsync(string slug)
+        {
+            return await GetAsync<ApiResponse<ProductResponseDto>>(
+                $"api/products/slug/{slug}");
         }
     }
 }

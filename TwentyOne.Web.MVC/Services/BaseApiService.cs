@@ -10,23 +10,32 @@ namespace TwentyOne.Web.MVC.Services
         protected readonly IHttpContextAccessor _httpContextAccessor;
         private readonly JsonSerializerOptions _jsonOptions;
 
-        public BaseApiService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public BaseApiService(
+            HttpClient httpClient,
+            IHttpContextAccessor httpContextAccessor)
         {
             _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor;
             _jsonOptions = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true,
+                PropertyNameCaseInsensitive = true
             };
         }
 
-        // add jwt token from session to request header
         protected void AttachToken()
         {
-            var token = _httpContextAccessor.HttpContext?.Session.GetString("JWToken");
+            var token = _httpContextAccessor.HttpContext?
+                .Session.GetString("JwtToken");
+
+            // Fall back to guest token
+            if (string.IsNullOrEmpty(token))
+                token = _httpContextAccessor.HttpContext?
+                    .Session.GetString("GuestToken");
+
             if (!string.IsNullOrEmpty(token))
             {
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
             }
         }
 
@@ -34,8 +43,31 @@ namespace TwentyOne.Web.MVC.Services
         {
             AttachToken();
             var response = await _httpClient.GetAsync(url);
-            if (!response.IsSuccessStatusCode) return default;
+
+            if (!response.IsSuccessStatusCode)
+                return default;
+
             var content = await response.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrWhiteSpace(content))
+                return default;
+
+            return JsonSerializer.Deserialize<T>(content, _jsonOptions);
+        }
+
+        protected async Task<T?> GetPublicAsync<T>(string url)
+        {
+            // Bypasses AttachToken() entirely
+            var response = await _httpClient.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+                return default;
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrWhiteSpace(content))
+                return default;
+
             return JsonSerializer.Deserialize<T>(content, _jsonOptions);
         }
 
@@ -43,9 +75,19 @@ namespace TwentyOne.Web.MVC.Services
         {
             AttachToken();
             var json = JsonSerializer.Serialize(data);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var content = new StringContent(
+                json, Encoding.UTF8, "application/json");
+
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json"));
+
             var response = await _httpClient.PostAsync(url, content);
             var responseContent = await response.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrWhiteSpace(responseContent))
+                return default;
+
             return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
         }
 
@@ -53,9 +95,19 @@ namespace TwentyOne.Web.MVC.Services
         {
             AttachToken();
             var json = JsonSerializer.Serialize(data);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var content = new StringContent(
+                json, Encoding.UTF8, "application/json");
+
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json"));
+
             var response = await _httpClient.PutAsync(url, content);
             var responseContent = await response.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrWhiteSpace(responseContent))
+                return default;
+
             return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
         }
 
@@ -64,7 +116,45 @@ namespace TwentyOne.Web.MVC.Services
             AttachToken();
             var response = await _httpClient.DeleteAsync(url);
             var responseContent = await response.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrWhiteSpace(responseContent))
+                return default;
+
             return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
+        }
+
+        protected async Task<T?> DeleteWithBodyAsync<T>(
+            string url, object data)
+        {
+            AttachToken();
+            var json = System.Text.Json.JsonSerializer.Serialize(data);
+            var request = new HttpRequestMessage(
+                HttpMethod.Delete, url)
+            {
+                Content = new StringContent(
+                    json,
+                    System.Text.Encoding.UTF8,
+                    "application/json")
+            };
+
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(
+                new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(
+                    "application/json"));
+
+            var response = await _httpClient.SendAsync(request);
+            var responseContent = await response.Content
+                .ReadAsStringAsync();
+
+            if (string.IsNullOrWhiteSpace(responseContent))
+                return default;
+
+            return System.Text.Json.JsonSerializer.Deserialize<T>(
+                responseContent,
+                new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
     }
 }

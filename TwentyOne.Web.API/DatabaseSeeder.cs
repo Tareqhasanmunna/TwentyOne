@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using TwentyOne.DAL.Entities;
+using TwentyOne.DAL.Repositories.Interfaces;
 
 namespace TwentyOne.Web.API
 {
@@ -47,6 +48,54 @@ namespace TwentyOne.Web.API
                         .AddToRoleAsync(superAdmin, "SuperAdmin");
                 }
             }
+        }
+
+        public static async Task SeedGuestAccountAsync(
+            UserManager<ApplicationUser> userManager)
+        {
+            var guestEmail = "guest@twentyone.com";
+            var existingGuest = await userManager.FindByEmailAsync(guestEmail);
+
+            if (existingGuest == null)
+            {
+                var guest = new ApplicationUser
+                {
+                    FullName = "Guest Customer",
+                    Email = guestEmail,
+                    UserName = guestEmail,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                var result = await userManager.CreateAsync(guest, "Guest@12345");
+                if (result.Succeeded)
+                    await userManager.AddToRoleAsync(guest, "Customer");
+            }
+        }
+
+        public static async Task SeedSiteSettingsAsync(
+            TwentyOne.DAL.Repositories.Interfaces.ISiteSettingRepository
+            siteSettingRepository)
+        {
+            // bKash number
+            var bkash = await siteSettingRepository
+                .GetValueAsync("BkashNumber");
+            if (string.IsNullOrEmpty(bkash))
+                await siteSettingRepository
+                    .SetValueAsync("BkashNumber", "01749028100");
+
+            // Delivery charges
+            var insideDhaka = await siteSettingRepository
+                .GetValueAsync("DeliveryCharge_InsideDhaka");
+            if (string.IsNullOrEmpty(insideDhaka))
+                await siteSettingRepository
+                    .SetValueAsync("DeliveryCharge_InsideDhaka", "80");
+
+            var outsideDhaka = await siteSettingRepository
+                .GetValueAsync("DeliveryCharge_OutsideDhaka");
+            if (string.IsNullOrEmpty(outsideDhaka))
+                await siteSettingRepository
+                    .SetValueAsync("DeliveryCharge_OutsideDhaka", "130");
         }
     }
 }

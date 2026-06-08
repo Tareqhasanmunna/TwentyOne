@@ -1,4 +1,5 @@
 ﻿using TwentyOne.Shared.DTOs.Requests;
+using TwentyOne.Shared.DTOs.Responses;
 using TwentyOne.Shared.Models;
 
 namespace TwentyOne.Web.MVC.Services

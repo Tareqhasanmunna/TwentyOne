@@ -1,0 +1,219 @@
+﻿@model TwentyOne.Shared.DTOs.Responses.PreOrderResponseDto
+@{
+    Layout = "_PublicLayout";
+    ViewData["Title"] = "Pre-Order Detail";
+    var apiUrl = ApiConfig.PublicBaseUrl;
+}
+
+<div class="container py-5">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="/Account/MyOrders"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h5 class="mb-0 fw-bold">@Model.PreOrderNumber</h5>
+            <p class="text-muted mb-0" style="font-size:13px">
+                Placed on @Model.CreatedAt.ToString("MMM dd, yyyy")
+            </p>
+        </div>
+        @{
+            var badgeClass = Model.Status switch
+            {
+                "Pending" => "warning text-dark",
+                "Confirmed" => "info text-dark",
+                "Ready" => "success",
+                "Delivered" => "primary",
+                "Cancelled" => "danger",
+                _ => "secondary"
+            };
+        }
+        <span class="ms-auto badge bg-@badgeClass fs-6">
+            @Model.Status
+        </span>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-7">
+            <!-- Product Info -->
+            <div class="card border-0 shadow-sm mb-4"
+                 style="border-radius:12px">
+                <div class="card-header fw-bold bg-white">
+                    Product
+                </div>
+                <div class="card-body d-flex gap-3">
+                    <div style="width:80px;height:80px;
+                        background:#fff0f3;border-radius:10px;
+                        display:flex;align-items:center;
+                        justify-content:center;flex-shrink:0">
+                        <i class="bi bi-car-front"
+                           style="font-size:30px;color:#e94560"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">@Model.ProductName</div>
+                        <div class="text-muted mt-1"
+                             style="font-size:13px">
+                            Full Price:
+                            <strong>
+                                ৳@Model.ProductPrice.ToString("N0")
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Summary -->
+            <div class="card border-0 shadow-sm mb-4"
+                 style="border-radius:12px">
+                <div class="card-header fw-bold bg-white">
+                    Payment Summary
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2"
+                         style="font-size:14px">
+                        <span>Full Price</span>
+                        <span>৳@Model.ProductPrice.ToString("N0")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2"
+                         style="font-size:14px">
+                        <span class="text-success">Deposit Paid</span>
+                        <span class="text-success">
+                            - ৳@Model.DepositAmount.ToString("N0")
+                        </span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Remaining Due</span>
+                        <span style="color:#e94560;font-size:20px">
+                            ৳@Model.RemainingAmount.ToString("N0")
+                        </span>
+                    </div>
+                    <small class="text-muted">
+                        + delivery charge on delivery
+                    </small>
+                </div>
+            </div>
+
+            <!-- bKash Info -->
+            <div class="card border-0 shadow-sm"
+                 style="border-radius:12px">
+                <div class="card-header fw-bold bg-white">
+                    bKash Payment Info
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2"
+                         style="font-size:14px">
+                        <span class="text-muted">Transaction ID</span>
+                        <span class="fw-bold"
+                              style="letter-spacing:1px">
+                            @Model.BkashTransactionId
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between"
+                         style="font-size:14px">
+                        <span class="text-muted">Sent From</span>
+                        <span class="fw-bold">
+                            @Model.BkashSenderNumber
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <!-- Status Timeline -->
+            <div class="card border-0 shadow-sm"
+                 style="border-radius:12px">
+                <div class="card-header fw-bold bg-white">
+                    Status Timeline
+                </div>
+                <div class="card-body">
+                    @{
+                        var statuses = new[]
+                        {
+                            ("Pending", "Payment verification pending",
+                             "bi-clock"),
+                            ("Confirmed", "Payment verified by store",
+                             "bi-check-circle"),
+                            ("Ready", "Product arrived — contact us!",
+                             "bi-box-seam"),
+                            ("Delivered", "Delivered successfully",
+                             "bi-house-check")
+                        };
+
+                        var currentIndex = Model.Status switch
+                        {
+                            "Pending" => 0,
+                            "Confirmed" => 1,
+                            "Ready" => 2,
+                            "Delivered" => 3,
+                            _ => -1
+                        };
+                    }
+
+                    @for (int i = 0; i < statuses.Length; i++)
+                    {
+                        var (status, desc, icon) = statuses[i];
+                        var isDone = i <= currentIndex;
+                        var isCurrent = i == currentIndex;
+
+                        <div class="d-flex gap-3 mb-3">
+                            <div style="width:32px;height:32px;
+                                border-radius:50%;
+                                background:@(isDone ? "#e94560" : "#f0f0f0");
+                                display:flex;align-items:center;
+                                justify-content:center;
+                                flex-shrink:0">
+                                <i class="bi @icon"
+                                   style="font-size:14px;
+                                    color:@(isDone ? "white" : "#aaa")">
+                                </i>
+                            </div>
+                            <div>
+                                <div style="font-size:13px;
+                                    font-weight:@(isCurrent ? "700" : "500");
+                                    color:@(isDone ? "#1a1a2e" : "#aaa")">
+                                    @status
+                                </div>
+                                <div style="font-size:11px;color:#6c757d">
+                                    @desc
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Status == "Cancelled")
+                    {
+                        <div class="alert alert-danger mt-2"
+                             style="font-size:13px;border-radius:8px">
+                            <i class="bi bi-x-circle me-2"></i>
+                            This pre-order was cancelled.
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.AdminNotes))
+                    {
+                        <div class="mt-3 p-3"
+                             style="background:#f0f7ff;
+                            border-radius:8px;
+                            font-size:13px">
+                            <strong>Note from store:</strong>
+                            <br />@Model.AdminNotes
+                        </div>
+                    }
+
+                    @if (Model.Status == "Ready")
+                    {
+                        <div class="alert alert-success mt-3"
+                             style="font-size:13px;border-radius:8px">
+                            <i class="bi bi-telephone me-2"></i>
+                            Your product has arrived! Please contact
+                            us to arrange delivery. Remember you have
+                            <strong>45 days</strong> to collect.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

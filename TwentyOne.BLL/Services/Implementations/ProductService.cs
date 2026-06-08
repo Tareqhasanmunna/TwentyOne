@@ -15,13 +15,16 @@ namespace TwentyOne.BLL.Services.Implementations
     {
         private readonly IProductRepository _productRepository;
         private readonly IBrandRepository _brandRepository;
+        private readonly SanitizationService _sanitizer;
 
         public ProductService(
             IProductRepository productRepository,
+            SanitizationService sanitizer,
             IBrandRepository brandRepository)
         {
             _productRepository = productRepository;
             _brandRepository = brandRepository;
+            _sanitizer = sanitizer;
         }
 
         public async Task<ApiResponse<PagedResponseDto<ProductResponseDto>>>
@@ -68,6 +71,10 @@ namespace TwentyOne.BLL.Services.Implementations
         public async Task<ApiResponse<ProductResponseDto>> CreateAsync(
             CreateProductDto dto)
         {
+            // Sanitize inputs
+            dto.Name = _sanitizer.SanitizePlainText(dto.Name);
+            dto.Description = _sanitizer.Sanitize(dto.Description);
+
             // Validate brand exists
             var brand = await _brandRepository.GetByIdAsync(dto.BrandId);
             if (brand == null)
@@ -91,11 +98,14 @@ namespace TwentyOne.BLL.Services.Implementations
                 Slug = slug,
                 Description = dto.Description,
                 Price = dto.Price,
+                DiscountPercentage = dto.DiscountPercentage,
+                DiscountAmount = dto.DiscountAmount,
                 StockQuantity = dto.StockQuantity,
                 Scale = dto.Scale,
                 ReleaseYear = dto.ReleaseYear,
                 IsLimitedEdition = dto.IsLimitedEdition,
                 IsPreOrder = dto.IsPreOrder,
+                PreOrderDeadline = dto.PreOrderDeadline,
                 BrandId = dto.BrandId,
                 CreatedAt = DateTime.UtcNow,
                 Images = dto.ImageUrls?.Select((url, index) =>
@@ -116,6 +126,10 @@ namespace TwentyOne.BLL.Services.Implementations
         public async Task<ApiResponse<ProductResponseDto>> UpdateAsync(
             int id, UpdateProductDto dto)
         {
+            // Sanitize inputs
+            dto.Name = _sanitizer.SanitizePlainText(dto.Name);
+            dto.Description = _sanitizer.Sanitize(dto.Description);
+
             var product = await _productRepository.GetByIdAsync(id);
             if (product == null)
                 return ApiResponse<ProductResponseDto>
@@ -146,11 +160,14 @@ namespace TwentyOne.BLL.Services.Implementations
             product.Name = dto.Name;
             product.Description = dto.Description;
             product.Price = dto.Price;
+            product.DiscountPercentage = dto.DiscountPercentage;
+            product.DiscountAmount = dto.DiscountAmount;
             product.StockQuantity = dto.StockQuantity;
             product.Scale = dto.Scale;
             product.ReleaseYear = dto.ReleaseYear;
             product.IsLimitedEdition = dto.IsLimitedEdition;
             product.IsPreOrder = dto.IsPreOrder;
+            product.PreOrderDeadline = dto.PreOrderDeadline;
             product.IsArchived = dto.IsArchived;
             product.BrandId = dto.BrandId;
             product.UpdatedAt = DateTime.UtcNow;
@@ -189,6 +206,26 @@ namespace TwentyOne.BLL.Services.Implementations
         // Private helper to map Product entity to DTO
         private static ProductResponseDto MapToDto(Product product)
         {
+            var deposit = product.Price >= 10000 ? 500 : 200;
+            decimal discountedPrice = product.Price;
+            string discountLabel = string.Empty;
+            bool hasDiscount = false;
+
+            if (product.DiscountPercentage > 0)
+            {
+                discountedPrice = product.Price -
+                    (product.Price * product.DiscountPercentage.Value / 100);
+                discountLabel = $"{product.DiscountPercentage}% OFF";
+                hasDiscount = true;
+            }
+            else if (product.DiscountAmount > 0)
+            {
+                discountedPrice = product.Price - product.DiscountAmount.Value;
+                discountLabel = $"Save ৳{product.DiscountAmount:N0}";
+                hasDiscount = true;
+            }
+            if (discountedPrice < 0) discountedPrice = 0;
+
             return new ProductResponseDto
             {
                 Id = product.Id,
@@ -196,6 +233,11 @@ namespace TwentyOne.BLL.Services.Implementations
                 Slug = product.Slug,
                 Description = product.Description,
                 Price = product.Price,
+                DiscountPercentage = product.DiscountPercentage,
+                DiscountAmount = product.DiscountAmount,
+                DiscountedPrice = discountedPrice,
+                HasDiscount = hasDiscount,
+                DiscountLabel = discountLabel,
                 StockQuantity = product.StockQuantity,
                 Scale = product.Scale,
                 ReleaseYear = product.ReleaseYear,
@@ -205,11 +247,15 @@ namespace TwentyOne.BLL.Services.Implementations
                 CreatedAt = product.CreatedAt,
                 BrandId = product.BrandId,
                 BrandName = product.Brand?.Name ?? string.Empty,
+                PreOrderDeadline = product.PreOrderDeadline,
+                PreOrderDeposit = deposit,
                 ImageUrls = product.Images?
                     .OrderBy(i => i.DisplayOrder)
                     .Select(i => i.ImageUrl)
                     .ToList() ?? new List<string>()
             };
         }
+
+
     }
 }

@@ -1,0 +1,340 @@
+﻿@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Admin List";
+    var admins = ViewBag.Admins as
+        System.Text.Json.JsonElement?;
+}
+
+<div class="d-flex justify-content-between
+    align-items-center mb-4">
+    <div>
+        <h5 class="mb-1 fw-bold">Admin Accounts</h5>
+        <p class="text-muted mb-0" style="font-size:13px">
+            Manage all admin and superadmin accounts
+        </p>
+    </div>
+    <a href="/Admin/CreateAdmin"
+       class="btn btn-primary">
+        <i class="bi bi-person-plus me-1"></i>
+        Create Admin
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0"
+               id="adminTable">
+            <thead>
+                <tr>
+                    <th class="ps-4">Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="adminTableBody">
+                <tr>
+                    <td colspan="7"
+                        class="text-center py-4">
+                        <div class="spinner-border
+                            spinner-border-sm
+                            text-primary me-2">
+                        </div>
+                        Loading admins...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Confirm Action Modal -->
+<div class="modal fade" id="confirmModal"
+     tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content"
+             style="border-radius:16px;border:none">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"
+                    id="modalTitle">
+                    Confirm Action
+                </h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="text-muted"
+                   style="font-size:14px"
+                   id="modalDesc">
+                </p>
+
+                <div class="p-3 mb-3"
+                     style="background:#fff8f0;
+                    border-radius:10px;
+                    border:1px solid #ffe0b2">
+                    <div class="d-flex align-items-center
+                        gap-2 mb-2">
+                        <i class="bi bi-shield-lock
+                        text-warning"></i>
+                        <strong style="font-size:13px">
+                            SuperAdmin Password Required
+                        </strong>
+                    </div>
+                    <p style="font-size:12px;
+                        color:#6c757d;margin:0">
+                        Enter your password to confirm
+                        this action.
+                    </p>
+                </div>
+
+                <div class="input-group">
+                    <input type="password"
+                           id="confirmPassword"
+                           class="form-control"
+                           placeholder="Your password" />
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            onclick="togglePassword(
+                        'confirmPassword',
+                        'confirmEyeIcon')">
+                        <i class="bi bi-eye"
+                           id="confirmEyeIcon"></i>
+                    </button>
+                </div>
+                <div id="confirmError"
+                     style="display:none;color:#dc3545;
+                    font-size:12px;margin-top:6px">
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+                <button type="button"
+                        id="confirmBtn"
+                        class="btn btn-danger"
+                        onclick="executeAction()">
+                    <i class="bi bi-check-lg me-1"></i>
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden forms -->
+<form id="toggleForm" method="post"
+      action="/Admin/ToggleAdmin" style="display:none">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="toggleId" />
+    <input type="hidden" name="password"
+           id="togglePassword" />
+</form>
+
+<form id="deleteForm" method="post"
+      action="/Admin/DeleteAdmin" style="display:none">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="deleteId" />
+    <input type="hidden" name="password"
+           id="deletePassword" />
+</form>
+
+@section Scripts {
+    <script>
+        var currentAction = null;
+        var currentId = null;
+        var modal = new bootstrap.Modal(
+            document.getElementById('confirmModal'));
+
+        // Load admins via API
+        async function loadAdmins() {
+            try {
+                var response = await fetch(
+                    '/Admin/GetAdminsJson');
+                var data = await response.json();
+
+                if (!data || !data.length) {
+                    document.getElementById('adminTableBody')
+                        .innerHTML = `
+                                <tr>
+                                    <td colspan="7"
+                                        class="text-center py-4
+                                               text-muted">
+                                        No admins found
+                                    </td>
+                                </tr>`;
+                    return;
+                }
+
+                var html = '';
+                data.forEach(admin => {
+                    var isSuperAdmin = admin.roles
+                        ?.includes('SuperAdmin');
+                    html += `
+                            <tr>
+                                <td class="ps-4">
+                                    <strong>${admin.fullName}</strong>
+                                </td>
+                                <td style="font-size:13px">
+                                    ${admin.email}
+                                </td>
+                                <td style="font-size:13px">
+                                    ${admin.phoneNumber || '-'}
+                                </td>
+                                <td>
+                                    <span class="badge ${isSuperAdmin
+                            ? 'bg-danger'
+                            : 'bg-primary'}">
+                                        ${isSuperAdmin
+                            ? 'SuperAdmin'
+                            : 'Admin'}
+                                    </span>
+                                </td>
+                                <td style="font-size:12px;
+                                           color:#6c757d">
+                                    ${new Date(admin.createdAt)
+                            .toLocaleDateString('en-GB', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                            })}
+                                </td>
+                                <td>
+                                    ${admin.isActive
+                            ? '<span class="badge bg-success">Active</span>'
+                            : '<span class="badge bg-secondary">Inactive</span>'}
+                                </td>
+                                <td>
+                                    ${!isSuperAdmin ? `
+                                    <button onclick="confirmToggle(
+                                        '${admin.id}',
+                                        '${admin.fullName}',
+                                        ${admin.isActive})"
+                                        class="btn btn-sm ${admin.isActive
+                                ? 'btn-outline-warning'
+                                : 'btn-outline-success'}
+                                            me-1">
+                                        <i class="bi bi-toggle-${admin.isActive
+                                ? 'on' : 'off'}"></i>
+                                        ${admin.isActive
+                                ? 'Deactivate'
+                                : 'Activate'}
+                                    </button>
+                                    <button onclick="confirmDelete(
+                                        '${admin.id}',
+                                        '${admin.fullName}')"
+                                        class="btn btn-sm
+                                               btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                        Delete
+                                    </button>` : `
+                                    <span class="text-muted"
+                                          style="font-size:12px">
+                                        Protected
+                                    </span>`}
+                                </td>
+                            </tr>`;
+                });
+
+                document.getElementById('adminTableBody')
+                    .innerHTML = html;
+            } catch (e) {
+                document.getElementById('adminTableBody')
+                    .innerHTML = `
+                            <tr>
+                                <td colspan="7"
+                                    class="text-center py-4
+                                           text-danger">
+                                    Failed to load admins
+                                </td>
+                            </tr>`;
+            }
+        }
+
+        function confirmToggle(id, name, isActive) {
+            currentAction = 'toggle';
+            currentId = id;
+            document.getElementById('modalTitle')
+                .textContent = isActive
+                    ? 'Deactivate Admin'
+                    : 'Activate Admin';
+            document.getElementById('modalDesc')
+                .textContent = isActive
+                    ? `Deactivating "${name}" will prevent them from logging in. You can reactivate them later.`
+                    : `Activating "${name}" will restore their access to the admin panel.`;
+            document.getElementById('confirmBtn')
+                .className = isActive
+                    ? 'btn btn-warning'
+                    : 'btn btn-success';
+            document.getElementById('confirmPassword')
+                .value = '';
+            document.getElementById('confirmError')
+                .style.display = 'none';
+            modal.show();
+        }
+
+        function confirmDelete(id, name) {
+            currentAction = 'delete';
+            currentId = id;
+            document.getElementById('modalTitle')
+                .textContent = 'Delete Admin';
+            document.getElementById('modalDesc')
+                .textContent = `You are about to permanently delete the admin account for "${name}". This action cannot be undone.`;
+            document.getElementById('confirmBtn')
+                .className = 'btn btn-danger';
+            document.getElementById('confirmPassword')
+                .value = '';
+            document.getElementById('confirmError')
+                .style.display = 'none';
+            modal.show();
+        }
+
+        function executeAction() {
+            var password = document
+                .getElementById('confirmPassword')
+                .value.trim();
+
+            if (!password) {
+                document.getElementById('confirmError')
+                    .textContent =
+                    'Please enter your password';
+                document.getElementById('confirmError')
+                    .style.display = 'block';
+                return;
+            }
+
+            if (currentAction === 'toggle') {
+                document.getElementById('toggleId')
+                    .value = currentId;
+                document.getElementById('togglePassword')
+                    .value = password;
+                modal.hide();
+                document.getElementById('toggleForm')
+                    .submit();
+            } else if (currentAction === 'delete') {
+                document.getElementById('deleteId')
+                    .value = currentId;
+                document.getElementById('deletePassword')
+                    .value = password;
+                modal.hide();
+                document.getElementById('deleteForm')
+                    .submit();
+            }
+        }
+
+        // Allow Enter key in password field
+        document.getElementById('confirmPassword')
+            .addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') executeAction();
+            });
+
+        // Load on page load
+        loadAdmins();
+    </script>
+}

@@ -5,8 +5,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+<PropertyGroup>
+	<WarningsNotAsErrors>NU1902;NU1903</WarningsNotAsErrors>
+	<UserSecretsId>9a2b02ab-099a-4f09-9794-6313af1d344d</UserSecretsId>
+</PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="HtmlSanitizer" Version="9.0.892" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
@@ -14,6 +19,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.8" />
+    <PackageReference Include="QuestPDF" Version="2026.5.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.14.11" />
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
@@ -22,6 +28,8 @@
   <ItemGroup>
     <Folder Include="Middleware\" />
     <Folder Include="Extensions\" />
+    <Folder Include="wwwroot\uploads\brands\" />
+    <Folder Include="wwwroot\uploads\products\" />
   </ItemGroup>
 
   <ItemGroup>

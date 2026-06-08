@@ -1,0 +1,114 @@
+﻿@model TwentyOne.Shared.DTOs.Requests.RegisterDto
+@{
+    Layout = "_PublicLayout";
+    ViewData["Title"] = "Register";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm" style="border-radius:16px">
+                <div class="card-body p-5">
+                    <h4 class="fw-bold text-center mb-1">Create Account</h4>
+                    <p class="text-muted text-center mb-4" style="font-size:14px">
+                        Join the TwentyOne collector community
+                    </p>
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger" style="font-size:13px">
+                            <ul class="mb-0">
+                                @foreach (var error in ViewData.ModelState.Values
+                                    .SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <form asp-action="Register" asp-controller="Account"
+                          method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Full Name</label>
+                            <input asp-for="FullName" class="form-control"
+                                   placeholder="Your full name" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input asp-for="Email" class="form-control"
+                                   placeholder="your@email.com" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <input asp-for="PhoneNumber" class="form-control"
+                                   placeholder="01700000000" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Password</label>
+                            <div class="input-group">
+                                <input asp-for="Password"
+                                       type="password"
+                                       id="regPassword"
+                                       class="form-control"
+                                       placeholder="Min 8 characters" />
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        onclick="togglePassword('regPassword',
+                                    'regEyeIcon')">
+                                    <i class="bi bi-eye" id="regEyeIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                Confirm Password
+                            </label>
+                            <div class="input-group">
+                                <input asp-for="ConfirmPassword"
+                                       type="password"
+                                       id="regConfirmPassword"
+                                       class="form-control"
+                                       placeholder="Repeat password" />
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        onclick="togglePassword('regConfirmPassword',
+                                    'regConfirmEyeIcon')">
+                                    <i class="bi bi-eye"
+                                       id="regConfirmEyeIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-3 mb-4"
+                             style="background:#f8f9fa;
+                            border-radius:10px;
+                            font-size:12px;color:#6c757d">
+                            <i class="bi bi-shield-check me-2
+                            text-success"></i>
+                            Password must be at least 8 characters,
+                            include uppercase, lowercase and a number.
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Create Account
+                        </button>
+                    </form>
+
+                    <p class="text-center mt-4 mb-0" style="font-size:13px">
+                        Already have an account?
+                        <a href="/Account/Login" class="text-primary fw-semibold">
+                            Login
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
