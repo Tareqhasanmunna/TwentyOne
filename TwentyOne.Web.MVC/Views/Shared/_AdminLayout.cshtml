@@ -159,7 +159,7 @@
             <h4>
                 @if (!string.IsNullOrEmpty(ViewBag.SiteLogo as string))
                 {
-                    <img src="@("http://localhost:5300" + ViewBag.SiteLogo)"
+                    <img src="@(ApiConfig.PublicBaseUrl + ViewBag.SiteLogo)"
                          style="width:28px;height:28px;object-fit:contain;
                     border-radius:6px;margin-right:6px" />
                 }

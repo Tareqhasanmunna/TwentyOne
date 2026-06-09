@@ -6,6 +6,8 @@ namespace TwentyOne.Shared.DTOs.Responses
 {
     public class PreOrderResponseDto
     {
+        public object PreOrderDeposit;
+
         public int Id { get; set; }
         public string PreOrderNumber { get; set; } = string.Empty;
         public decimal DepositAmount { get; set; }

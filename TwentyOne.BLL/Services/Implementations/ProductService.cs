@@ -81,6 +81,13 @@ namespace TwentyOne.BLL.Services.Implementations
                 return ApiResponse<ProductResponseDto>
                     .FailResponse("Brand not found");
 
+            // If product is pre-order, ignore any discount inputs
+            if (dto.IsPreOrder)
+            {
+                dto.DiscountPercentage = null;
+                dto.DiscountAmount = null;
+            }
+
             // Generate unique slug
             var slug = SlugHelper.GenerateSlug(dto.Name);
             var originalSlug = slug;
@@ -140,6 +147,13 @@ namespace TwentyOne.BLL.Services.Implementations
             if (brand == null)
                 return ApiResponse<ProductResponseDto>
                     .FailResponse("Brand not found");
+
+            // If product is pre-order, ignore any discount inputs
+            if (dto.IsPreOrder)
+            {
+                dto.DiscountPercentage = null;
+                dto.DiscountAmount = null;
+            }
 
             // Regenerate slug if name changed
             if (product.Name != dto.Name)

@@ -167,6 +167,10 @@ namespace TwentyOne.DAL.Context
             builder.Entity<PreOrder>()
                 .Property(p => p.RemainingAmount)
                 .HasColumnType("decimal(18,2)");
+
+            builder.Entity<Product>()
+                .Property(p => p.PreOrderDeposit)
+                .HasColumnType("decimal(18,2)");
         }
     }
 }

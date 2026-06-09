@@ -69,7 +69,7 @@
                         </div>
 
                         <!-- Discount Section -->
-                        <div class="col-12">
+                        <div class="col-12" id="discountSection">
                             <div class="p-3"
                                  style="background:#fff8f0;border-radius:12px;
                                 border:1px solid #ffe0b2">
@@ -439,6 +439,29 @@
         if (document.getElementById('IsPreOrder').checked) {
             document.getElementById('preOrderDeadlineField')
                 .style.display = 'block';
+        }
+
+        // Show/hide discount based on pre-order toggle
+        document.getElementById('IsPreOrder')
+            .addEventListener('change', function () {
+                var discountSection = document
+                    .getElementById('discountSection');
+                if (this.checked) {
+                    discountSection.style.display = 'none';
+                    // Clear discount values
+                    document.querySelector('[name="DiscountPercentage"]')
+                        .value = '';
+                    document.querySelector('[name="DiscountAmount"]')
+                        .value = '';
+                } else {
+                    discountSection.style.display = 'block';
+                }
+            });
+
+        // On page load
+        if (document.getElementById('IsPreOrder').checked) {
+            document.getElementById('discountSection')
+                .style.display = 'none';
         }
 
         function previewDiscount() {
